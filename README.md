@@ -34,10 +34,11 @@ Run dDocentHPC as follows:
 bash dDocentHPC.bash trimFQmap config.4.all
 ```
 
-2. Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
+#### Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
   * obtain reference genome from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/)
     * reference genome should be a `fasta` formatted file and can be composed of 1, several, or all loci in the mtGenome
     * name reference genome as follows: `reference.GenusSpecies.GenBankAccession.fasta` 
   * set cutoff in the `dDocentHPC` `config*` file to <GenusSpecies>
   * set cutoff2 i the `dDocentHPC` `config*` file to <GenBankAccession>
-3. 
+
+#### `bam2fasta`
