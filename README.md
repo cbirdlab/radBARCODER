@@ -5,7 +5,9 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 ## How it works
 
-1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
+Follow these steps to make mtGenomes from each individual in your RAD data set.
+
+#### Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
 `config*` file settings:
 ```bash
