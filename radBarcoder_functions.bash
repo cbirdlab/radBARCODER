@@ -44,7 +44,7 @@ bam2fasta(){
 	#add ID to name of consensus
 		sed -i "s/^>/>${ID}_/g" ${ID2}_masked_consensus.fasta
 }
-export -f mkMaskedCONSENSI
+export -f bam2fasta
 
 #function to get locus from masked consensus sequences, mito genomes, and NCBI nucleotide records, clean and align
 alignLocusBySample(){
