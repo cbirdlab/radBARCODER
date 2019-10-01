@@ -6,7 +6,8 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 ## How it works
 
 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
-   `config*` file settings:
+
+`config*` file settings:
 ```bash
 32              Number of Processors (Auto, 1, 2, 3, ..., n threads) cbirdq=40 normal=20
 230G    Maximum Memory (1G,2G,..., 256G)  G=gigabytes
