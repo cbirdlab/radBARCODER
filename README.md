@@ -54,9 +54,14 @@ NC_023222               Cutoff2 (integer)                                       
 
 #### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
 
+You can `module load ddocent` on your hpc to get the required software for `bam2fasta`
+
 ```bash
 CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
+THREADS=8
+#bamPATTERN=$CUTOFFS-RG           #search pattern for bam files
+#REF=reference${CUTOFFS}.fasta
 
-radBarCoder_run.bash bam2fasta $CUTOFFS
+radBARCODER.bash bam2fasta $CUTOFFS $THREADS
 
 ```
