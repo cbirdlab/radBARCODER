@@ -1,4 +1,4 @@
-# radBarCoder
+# radBARCODER
 scripts to extract, align, and type mtDNA data from restriction site associated DNA
 
 ---
@@ -7,7 +7,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 Follow these steps to make mtGenomes from each individual in your RAD data set.
 
-#### Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
+#### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
 `config*` file settings:
 ```bash
@@ -34,11 +34,38 @@ Run dDocentHPC as follows:
 bash dDocentHPC.bash trimFQmap config.4.all
 ```
 
-#### Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
+#### 2. Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
   * obtain reference genome from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/)
     * reference genome should be a `fasta` formatted file and can be composed of 1, several, or all loci in the mtGenome
     * name reference genome as follows: `reference.GenusSpecies.GenBankAccession.fasta` 
-  * set cutoff in the `dDocentHPC` `config*` file to <GenusSpecies>
-  * set cutoff2 i the `dDocentHPC` `config*` file to <GenBankAccession>
+  * set cutoff in the `dDocentHPC` `config*` file to *_GenusSpecies_*
+  * set cutoff2 i the `dDocentHPC` `config*` file to *_GenBankAccession_*
 
-#### `bam2fasta`
+```bash
+----------mkREF: Settings for de novo assembly of the reference genome--------------------------------------------
+PE              Type of reads for assembly (PE, SE, OL, RPE)                                    PE=ddRAD & ezRAD pairedend, non-overlapping reads;$
+0.9             cdhit Clustering_Similarity_Pct (0-1)                                                   Use cdhit to cluster and collapse uniq rea$
+Hspil           Cutoff1 (integer)                                                                                               Use unique reads t$
+NC_023222               Cutoff2 (integer)                                                                                               Use unique$
+0.05    rainbow merge -r <percentile> (decimal 0-1)                                             Percentile-based minimum number of seqs to assembl$
+0.95    rainbow merge -R <percentile> (decimal 0-1)                                             Percentile-based maximum number of seqs to assembl$
+------------------------------------------------------------------------------------------------------------------
+```
+
+#### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
+
+You can `module load ddocent` on your hpc to get the required software for `bam2fasta`
+
+```bash
+CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
+THREADS=8
+#bamPATTERN=$CUTOFFS-RG           #search pattern for bam files
+#REF=reference${CUTOFFS}.fasta
+
+radBARCODER.bash bam2fasta $CUTOFFS $THREADS
+
+```
+
+This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual.  
+
+#### 4. 
