@@ -54,18 +54,46 @@ NC_023222               Cutoff2 (integer)                                       
 
 #### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
 
-You can `module load ddocent` on your hpc to get the required software for `bam2fasta`
+You should `module load ddocent` on your hpc to get the required software for `bam2fasta`
 
 ```bash
 CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
 THREADS=8
 #bamPATTERN=$CUTOFFS-RG           #search pattern for bam files
 #REF=reference${CUTOFFS}.fasta
+#IDs=($(ls *$bamPATTERN.bam | sed "s/$bamPATTERN\.bam//g"))
 
-radBARCODER.bash bam2fasta $CUTOFFS $THREADS
+bash radBARCODER.bash bam2fasta $CUTOFFS $THREADS
 
 ```
 
 This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual.  
 
-#### 4. 
+#### 4. Select a portion of the genomes and `align` it across individuals
+
+You should `module load ddocent mafft` on your hpc to get the required software 
+
+```bash
+PREFIX=fish	#prefix on files created
+THREADS=8
+#POSITIONS=60-550,6680-7020	#start and end positions of mtDNA fragment to excise, readable by cut -f 
+LOCUS="12S-COI"	#name of locus
+POSITIONS=40-200
+LOCUS="tRNA-Phe-12S"
+POSITIONS=5600-6000
+LOCUS="COI"
+POSITIONS=10000-10500
+LOCUS="tRNA-Arg-ND4L-ND4"
+POSITIONS=1-16797
+LOCUS="mtGenome"
+
+GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
+
+bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS $GENBANKFASTA
+```
+
+
+
+
+
+
