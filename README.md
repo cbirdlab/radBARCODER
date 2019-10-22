@@ -39,6 +39,6 @@ bash dDocentHPC.bash trimFQmap config.4.all
     * reference genome should be a `fasta` formatted file and can be composed of 1, several, or all loci in the mtGenome
     * name reference genome as follows: `reference.GenusSpecies.GenBankAccession.fasta` 
   * set cutoff in the `dDocentHPC` `config*` file to *_GenusSpecies_*
-  * set cutoff2 i the `dDocentHPC` `config*` file to <GenBankAccession>
+  * set cutoff2 i the `dDocentHPC` `config*` file to *_GenBankAccession_*
 
 #### `bam2fasta`
