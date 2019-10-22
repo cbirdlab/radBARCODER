@@ -86,9 +86,10 @@ LOCUS="COI"
 #LOCUS="tRNA-Arg-ND4L-ND4"
 #POSITIONS=1-16797
 #LOCUS="mtGenome"
+mtGenPATTERN="reference.H*fasta"   #pattern match for fasta files with mito genomes to include in alignment
 GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
 
-bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS $GENBANKFASTA
+bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS $mtGenPATTERN $GENBANKFASTA
 ```
 
 
