@@ -7,7 +7,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 Follow these steps to make mtGenomes from each individual in your RAD data set.
 
-#### Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
+#### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
 `config*` file settings:
 ```bash
@@ -34,7 +34,7 @@ Run dDocentHPC as follows:
 bash dDocentHPC.bash trimFQmap config.4.all
 ```
 
-#### Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
+#### 2. Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
   * obtain reference genome from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/)
     * reference genome should be a `fasta` formatted file and can be composed of 1, several, or all loci in the mtGenome
     * name reference genome as follows: `reference.GenusSpecies.GenBankAccession.fasta` 
