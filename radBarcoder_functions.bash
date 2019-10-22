@@ -3,13 +3,13 @@
 #this script contains functions to convert bam files to fasta alignments for the purposes of DNA barcoding
 
 #default user defined variables
-THREADS=7
-CUTOFFS=".48.48"							#dDocent cutoffs used for reference genome
+THREADS=8
+CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
 FILTER=4									#filter reads with this samtools flag
-PREFIX=fish									#prefix on files created
-POSITIONS=5464-6500							#start and end positions of mtDNA fragment to excise
+PREFIX=Hspilopterus									#prefix on files created
+POSITIONS=5683-5951							#start and end positions of mtDNA fragment to excise
 LOCUS=begCOI								#name of locus
-mtGENOMEs="*Puntioplites*mtGenome.fasta"	#ls search string to return mitoGenomes, names should end with _mtGenome.fasta
+mtGENOMEs="reference.fasta"	#ls search string to return mitoGenomes, names should end with _mtGenome.fasta
 OUTLIERS=RAD_OUTLIER_Pfalcifer_fish.txt		#name of file containing fish in outlier group
 pctMissCall=50
 
@@ -81,7 +81,7 @@ alignLocusBySample(){
 		seaview -convert -output_format fasta -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta -del_gap_only_sites -
 		seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.nex ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta
 }
-
+export -f alignLocusBySample
 #function to make consensus sequences from aligned fasta files
 mkConsensusFasta(){
 	#assign arguments to variables
