@@ -65,3 +65,7 @@ THREADS=8
 radBARCODER.bash bam2fasta $CUTOFFS $THREADS
 
 ```
+
+This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual.  
+
+#### 4. 
