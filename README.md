@@ -74,19 +74,18 @@ This should result in a `vcf.gz` and a `masked_consensus.fasta` for every indivi
 You should `module load ddocent mafft` on your hpc to get the required software 
 
 ```bash
-PREFIX=fish	#prefix on files created
+PREFIX=Test	#prefix on files created
 THREADS=8
 #POSITIONS=60-550,6680-7020	#start and end positions of mtDNA fragment to excise, readable by cut -f 
-LOCUS="12S-COI"	#name of locus
-POSITIONS=40-200
-LOCUS="tRNA-Phe-12S"
+#LOCUS="12S-COI"	#name of locus
+#POSITIONS=40-200
+#LOCUS="tRNA-Phe-12S"
 POSITIONS=5600-6000
 LOCUS="COI"
-POSITIONS=10000-10500
-LOCUS="tRNA-Arg-ND4L-ND4"
-POSITIONS=1-16797
-LOCUS="mtGenome"
-
+#POSITIONS=10000-10500
+#LOCUS="tRNA-Arg-ND4L-ND4"
+#POSITIONS=1-16797
+#LOCUS="mtGenome"
 GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
 
 bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS $GENBANKFASTA
