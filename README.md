@@ -41,4 +41,15 @@ bash dDocentHPC.bash trimFQmap config.4.all
   * set cutoff in the `dDocentHPC` `config*` file to *_GenusSpecies_*
   * set cutoff2 i the `dDocentHPC` `config*` file to *_GenBankAccession_*
 
-#### `bam2fasta`
+```bash
+----------mkREF: Settings for de novo assembly of the reference genome--------------------------------------------
+PE              Type of reads for assembly (PE, SE, OL, RPE)                                    PE=ddRAD & ezRAD pairedend, non-overlapping reads;$
+0.9             cdhit Clustering_Similarity_Pct (0-1)                                                   Use cdhit to cluster and collapse uniq rea$
+Hspil           Cutoff1 (integer)                                                                                               Use unique reads t$
+NC_023222               Cutoff2 (integer)                                                                                               Use unique$
+0.05    rainbow merge -r <percentile> (decimal 0-1)                                             Percentile-based minimum number of seqs to assembl$
+0.95    rainbow merge -R <percentile> (decimal 0-1)                                             Percentile-based maximum number of seqs to assembl$
+------------------------------------------------------------------------------------------------------------------
+```
+
+#### 3. `bam2fasta`
