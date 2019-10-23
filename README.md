@@ -54,18 +54,94 @@ NC_023222               Cutoff2 (integer)                                       
 
 #### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
 
-You can `module load ddocent` on your hpc to get the required software for `bam2fasta`
+dependencies: bedtools bcftools (fyi, both are required by ddocent)
 
 ```bash
 CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
 THREADS=8
 #bamPATTERN=$CUTOFFS-RG           #search pattern for bam files
 #REF=reference${CUTOFFS}.fasta
+#IDs=($(ls *$bamPATTERN.bam | sed "s/$bamPATTERN\.bam//g"))
 
-radBARCODER.bash bam2fasta $CUTOFFS $THREADS
+bash radBARCODER.bash bam2fasta $CUTOFFS $THREADS
 
 ```
 
 This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual.  
 
-#### 4. 
+#### 4. Select a portion of the genomes and `align` it across individuals
+
+Dependencies: pagan mafft seaview 
+
+You can specify which positions to target to make alignments, including disjunct positions. For example, if you want to specify positions 1-10, then:
+
+```bash
+POSITIONS=1-10
+```
+
+If you want positions 1-4 and 6-10, then:
+
+```bash
+POSITIONS=1-4,6-10
+```
+
+The other issue is which aligner to use.  I've tried clustalw, clustalo, mafft, and pagan2.  I've found pagan2 to be superior in that it almost never needs to be aligned by eye to clean up mistakes.  The default behavior is to run pagan2 for alignment.  However, if you run into problems, potentially due to sequences being very long, then you can try mafft with options set for very long sequences as follows:
+
+```bash
+LONGALIGNMENT=TRUE
+```
+
+The following are the variables to set and command to run the alignment.
+
+```bash
+POSITIONS=60-550,6680-7020	#start and end positions of mtDNA fragment to excise, readable by cut -f 
+LOCUS="12S-COI"	#name of locus
+POSITIONS=40-200
+LOCUS="tRNA-Phe-12S"
+POSITIONS=5665-5970
+LOCUS="COI"
+POSITIONS=10000-10500
+LOCUS="tRNA-Arg-ND4L-ND4"
+POSITIONS=1-17000
+LOCUS="mtGenome"
+
+
+#CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
+#PREFIX=Test	#prefix on files created
+#THREADS=8   # number of cores to use
+#mtGenPATTERN="reference.H*fasta"   #pattern match for fasta files with mito genomes to include in alignment
+#GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
+
+CUTOFFS=".Hspil.NC_023222"
+POSITIONS=40-200,5665-5970,10000-10500
+LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
+PREFIX=Test_
+THREADS=8
+mtGenPATTERN="reference.H*fasta"
+GENBANKFASTA=""
+LONGALIGNMENT=FALSE
+bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $GENBANKFASTA
+```
+
+#### 5. Make network with `PopArt` 
+
+[`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.
+
+
+#### 6. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 5
+
+
+#### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals
+
+dependencies: R (seqinr, stringr)
+
+Set the PCT varable between 1 and 99, where it is the amount of allowable missing data. I recommend trying 10,25, and 50 to start with.  Histograms and culled alignments are output.  As the percent missing data goes down, the number of sequences retained also goes down, and the number of bp that are shared across all sequences goes up.
+
+```bash
+FASTA="Test_ALL_masked_aligned_clean_tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4.fasta"
+PCT=10
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+```
+
+
+
