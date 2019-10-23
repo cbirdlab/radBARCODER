@@ -134,4 +134,14 @@ bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS "$mtGenP
 #### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals
 
 
+```bash
+CUTOFFS=".Hspil.NC_023222"
+PREFIX=Test_
+THREADS=8
+LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
+bash radBARCODER.bash maximizeBP $CUTOFFS $THREADS $PREFIX $LOCUS
+
+```
+
+
 
