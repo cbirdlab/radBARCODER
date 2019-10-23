@@ -73,14 +73,37 @@ This should result in a `vcf.gz` and a `masked_consensus.fasta` for every indivi
 
 Dependencies: ddocent pagan seaview 
 
+You can specify which positions to target to make alignments, including disjunct positions. For example, if you want to specify positions 1-10, then:
+
 ```bash
-#POSITIONS=60-550,6680-7020	#start and end positions of mtDNA fragment to excise, readable by cut -f 
-#LOCUS="12S-COI"	#name of locus
-#POSITIONS=40-200
+POSITIONS=1-10
+```
+
+If you want positions 1-4 and 6-10, then:
+
+```bash
+POSITIONS=1-4,6-10
+```
+
+The other issue is which aligner to use.  I've tried clustalw, clustalo, mafft, and pagan2.  I've found pagan2 to be superior in that it almost never needs to be aligned by eye to clean up mistakes.  The default behavior is to run pagan2 for alignment.  However, if you run into problems, potentially due to sequences being very long, then you can try mafft with options set for very long sequences as follows:
+
+```bash
+LONGALIGNMENT=TRUE
+```
+
+The following are the variables to set and command to run the alignment.
+
+```bash
+POSITIONS=60-550,6680-7020	#start and end positions of mtDNA fragment to excise, readable by cut -f 
+LOCUS="12S-COI"	#name of locus
+POSITIONS=40-200
+LOCUS="tRNA-Phe-12S"
 POSITIONS=5665-5970
-LOCUS="COI"#LOCUS="tRNA-Phe-12S"
-#POSITIONS=10000-10500
-#LOCUS="tRNA-Arg-ND4L-ND4"
+LOCUS="COI"
+POSITIONS=10000-10500
+LOCUS="tRNA-Arg-ND4L-ND4"
+POSITIONS=1-17000
+LOCUS="mtGenome"
 
 
 #CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
@@ -90,12 +113,13 @@ LOCUS="COI"#LOCUS="tRNA-Phe-12S"
 #GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
 
 CUTOFFS=".Hspil.NC_023222"
-POSITIONS=1-17000
-LOCUS="mtGenome"
+POSITIONS=40-200,5665-5970,10000-10500
+LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
 PREFIX=Test_
 THREADS=8
 mtGenPATTERN="reference.H*fasta"
 GENBANKFASTA=""
+LONGALIGNMENT=FALSE
 bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS "$mtGenPATTERN" $GENBANKFASTA
 ```
 
