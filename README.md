@@ -90,7 +90,7 @@ LOCUS="COI"#LOCUS="tRNA-Phe-12S"
 #GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
 
 CUTOFFS=".Hspil.NC_023222"
-POSITIONS=1-16797
+POSITIONS=1-17000
 LOCUS="mtGenome"
 PREFIX=Test_
 THREADS=8
@@ -99,10 +99,15 @@ GENBANKFASTA=""
 bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS "$mtGenPATTERN" $GENBANKFASTA
 ```
 
-#### 5. Make network with `popart` 
+#### 5. Make network with `PopArt` 
 
-Popart
+[`PopArt`](http://popart.otago.ac.nz/index.shtml), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.
 
+
+#### 6. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 5
+
+
+#### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals
 
 
 
