@@ -90,9 +90,11 @@ cp *R PathToProjectDir
 
 *Dependencies*: [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, both are required by ddocent, so you could module load ddocent on your hpc)
 
+Update the following variable assignments and run `radBARCODER`:
+
 ```bash
-CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
-THREADS=8                        #number of processors to use for parallel operations
+CUTOFFS=".Hspil.NC_023222"  #dDocent cutoffs used for reference genome
+THREADS=8  #number of processors to use for parallel operations
 bash radBARCODER.bash bam2fasta $CUTOFFS $THREADS
 ```
 
@@ -123,14 +125,14 @@ The other issue is which aligner to use.  I've tried `clustalw`, `clustalo`, `ma
 LONGALIGNMENT=TRUE
 ```
 
-The following are the variables to set and command to run the alignment.
+Update the following variable assignments and run `radBARCODER`:
 
 ```bash
-#CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
-#PREFIX=Test	#prefix on files created
-#THREADS=8   # number of cores to use
-#mtGenPATTERN="reference.H*fasta"   #pattern match for fasta files with mito genomes to include in alignment
-#GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
+#CUTOFFS=".Hspil.NC_023222"  #dDocent cutoffs used for reference genome
+#PREFIX=Test  #prefix on files created
+#THREADS=8  # number of cores to use
+#mtGenPATTERN="reference.H*fasta"  #pattern match for fasta files with mito genomes to include in alignment
+#GENBANKFASTA=""  #name of fasta file with additional sequences from genbank to include in alignment
 
 CUTOFFS=".Hspil.NC_023222"
 POSITIONS=40-200,5665-5970,10000-10500
@@ -160,6 +162,8 @@ Not vetted for mass consumption yet
 This function will call `maximizeBP.R` which is included in the `radBARCODER` repo.  Make sure it is in your working directory
 
 Set the `PCT` varable between 1 and 99, where it is the amount of allowable missing data. I recommend trying 10,25, and 50 to start with.  Histograms and culled alignments are output.  As the percent missing data goes down, the number of sequences retained also goes down, and the number of bp that are shared across all sequences goes up.
+
+Update the following variable assignments and run `radBARCODER`:
 
 ```bash
 FASTA="Test_ALL_masked_aligned_clean_tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4.fasta"
