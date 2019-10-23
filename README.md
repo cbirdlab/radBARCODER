@@ -76,10 +76,10 @@ From here forward, you'll be running the `radBARCODER.bash` script in `bash`.  I
 You need to clone this repository to your computer:
 
 ```bash
-git clone git@github.com:cbirdlab/radBarCoder.git
+https://github.com/cbirdlab/radBARCODER.git   #html
 ```
 
-Then you will need to copy all scripts in the repo ending in bash or R to your project directory:
+Then you will need to copy all scripts in the repo ending in `bash` or `R` to your project directory:
 
 ```bash
 #move into the repo you just cloned
@@ -103,7 +103,7 @@ This should result in a `vcf.gz` and a `masked_consensus.fasta` for every indivi
 
 *Dependencies*: [`pagan`](http://wasabiapp.org/software/pagan/) [`mafft`](https://mafft.cbrc.jp/alignment/software/) [`seaview`](http://doua.prabi.fr/software/seaview) 
 
-Note that seaview is only used to convert from fasta to nexus format, so if you don't have it installed, you can manually convert the fasta to nexus. Also, while the pagan precompiled tar.gz does have mafft, it is not complete and you should use the complete mafft if you are aligning very long sequences, otherwise you will get an error when setting `LONGALIGNMENT=TRUE`
+Note that seaview is only used to convert from `fasta` to `nexus` format, so if you don't have it installed, you can manually convert the `fasta` to `nexus`. Also, while the pagan precompiled tar.gz does have mafft, it is not complete and you should use the complete mafft if you are aligning very long sequences, otherwise you will get an error when setting `LONGALIGNMENT=TRUE`
 
 You can specify which positions to target to make alignments, including disjunct positions. For example, if you want to specify positions 1-10, then:
 
@@ -157,9 +157,9 @@ Not vetted for mass consumption yet
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
-This function will call `maximizeBP.R` which is included in the radBARCODER repo.  Make sure it is in your working directory
+This function will call `maximizeBP.R` which is included in the `radBARCODER` repo.  Make sure it is in your working directory
 
-Set the PCT varable between 1 and 99, where it is the amount of allowable missing data. I recommend trying 10,25, and 50 to start with.  Histograms and culled alignments are output.  As the percent missing data goes down, the number of sequences retained also goes down, and the number of bp that are shared across all sequences goes up.
+Set the `PCT` varable between 1 and 99, where it is the amount of allowable missing data. I recommend trying 10,25, and 50 to start with.  Histograms and culled alignments are output.  As the percent missing data goes down, the number of sequences retained also goes down, and the number of bp that are shared across all sequences goes up.
 
 ```bash
 FASTA="Test_ALL_masked_aligned_clean_tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4.fasta"
