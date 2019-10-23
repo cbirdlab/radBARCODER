@@ -22,7 +22,7 @@ library(stringr)
 	pctMissingCalls <- 100*str_count(alignment$seq,pattern="[-Nn]")/bp
 
 #output histograms of missing data (nucleotide calls)
-pdf(file="missingCalls.pdf")
+pdf(file=paste("missingCalls", pctMissCall, ".pdf", sep=""))
   hist(missingCalls)
   hist(pctMissingCalls)
 
@@ -35,7 +35,7 @@ pdf(file="missingCalls.pdf")
 
 #calculate number of missing calls at each site and make histogram
 	numN <- sapply(1:dim(nuc)[1], function(x) sum(nuc[x,] == "-" | nuc[x,] == "[nN]"))
-	hist(numN, xlab="Number of Missing Calls Per Site")
+	hist(numN, xlab="Number of Missing Calls Per Site", breaks=100)
 
 #filter all sites with missing nucleotide calls, then convert from matrix back to list of sequences
 	keeperNucs <- nuc[numN == 0,]

@@ -3,22 +3,51 @@
 #this script contains functions to convert bam files to fasta alignments for the purposes of DNA barcoding
 
 #default user defined variables
-THREADS=8
-CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
-FILTER=4									#filter reads with this samtools flag
-PREFIX=Hspilopterus									#prefix on files created
-POSITIONS=5683-5951							#start and end positions of mtDNA fragment to excise
-LOCUS=begCOI								#name of locus
-mtGENOMEs="reference.fasta"	#ls search string to return mitoGenomes, names should end with _mtGenome.fasta
-OUTLIERS=RAD_OUTLIER_Pfalcifer_fish.txt		#name of file containing fish in outlier group
+# THREADS=8
+# CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
+#FILTER=4									#filter reads with this samtools flag
+# PREFIX=Hspilopterus									#prefix on files created
+# POSITIONS=5683-5951							#start and end positions of mtDNA fragment to excise
+# LOCUS=begCOI								#name of locus
+# mtGENOMEs="reference.fasta"	#ls search string to return mitoGenomes, names should end with _mtGenome.fasta
+# OUTLIERS=RAD_OUTLIER_Pfalcifer_fish.txt		#name of file containing fish in outlier group
 pctMissCall=50
 
 #automatic variables
-REF=reference${CUTOFFS}.fasta
+# REF=reference${CUTOFFS}.fasta
 BAMLIST=bamlist${CUTOFFS}.list
 catFILE1=cat${CUTOFFS}-FLTR_F4.bam 
 bamLIST2=bamlist${CUTOFFS}.list2
 catFILE2=cat${CUTOFFS}-FLTR_F$FILTER.bam 
+
+
+#
+ntrlvdFasta2Fasta(){
+	#convert an interleaved fasta to a normal fasta
+	if read -t 0; then
+	INFILE=$1
+	OUTFILE=$2
+	SORT=$3
+	if [ "$SORT" == "TRUE" ]; then
+		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | sort | tr "\t" "\n" > $OUTFILE
+	else
+		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | tr "\t" "\n" > $OUTFILE
+	fi
+
+	else
+
+	INFILE=/dev/stdin
+	SORT=$1
+	if [ "$SORT" == "TRUE" ]; then
+		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | sort | tr "\t" "\n" 
+	else
+		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | tr "\t" "\n" 
+	fi
+
+	fi
+}
+export -f ntrlvdFasta2Fasta
+
 
 #function to create consensus sequences using individually masked reference genomes
 	#superior to using a single unmasked reference genome
@@ -54,34 +83,42 @@ alignLocusBySample(){
 		local midFILE=$3
 		local POSITIONS=$4
 		local LOCUS=$5
-		#eval mtgenomes="$6"		#cant figure this one out
-		local GENBANK=$6
-		name=$7[@]
-		local IDs=("${!name}")
+		local mtGenPATTERN="$6"		#cant figure this one out
+		local GENBANK=$7
+		# local name=$7[@]
+		# local IDs=("${!name}")
 
 	#get locus from all individuals and align, $POSITIONS determines the locus
 		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}RAD_masked_$LOCUS.fasta
 	#remove individuals with no sequences or all N
 		sed 's/^NN*$//g' ${PREFIX}RAD_masked_$LOCUS.fasta | grep -P -B 1 '^[ACTGN@]+$' | grep -v '\-\-' > ${PREFIX}RAD_masked_${LOCUS}_clean.fasta
 	#make fasta from mtGenome sequences
-		ls $mtGENOMEs | sed 's/_mtGenome.fasta//g' | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}_mtGenome.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}MtGenomes_$LOCUS.fasta
+		if [ ! -z "$mtGenPATTERN" ]; then
+			ls $mtGenPATTERN | sed 's/.fasta//g' | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}MtGenomes_$LOCUS.fasta
+		fi
 	#Make fasta from other NCBI nucleotide sequences
 		#need to code, right now, just download as 1 big fasta
 	#Combine fastas, make sure to add genbank nucleotide recs as neccessary
-		echo $GENBANK
+		#echo $GENBANK
 		cat ${PREFIX}MtGenomes_$LOCUS.fasta ${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ${PREFIX}ALL_masked_$LOCUS.fasta 
 	#Align all_*.fasta
 		#clustalw -infile=${PREFIX}ALL_masked_$LOCUS.fasta -align -type=DNA -output=NEXUS -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.nex
 		#clustalo -infile=${PREFIX}ALL_masked_$LOCUS.fasta -t DNA --outfmt=fa -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.fasta --threads $THREADS 
 		#mafft --thread $THREADS ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 		#mafft --thread $THREADS --ep 0.123 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
-		mafft --thread $THREADS --globalpair --maxiterate 1000 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
+		if [ "$LONGALIGNMENT" == "TRUE" ] || [ "$LONGALIGNMENT" == "T" ]; then
+			mafft --thread $THREADS --globalpair --maxiterate 1000 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
+		else 
+			pagan2 -s ${PREFIX}ALL_masked_$LOCUS.fasta -o ${PREFIX}ALL_masked_aligned_$LOCUS --threads $THREADS
+			mv ${PREFIX}ALL_masked_aligned_$LOCUS.fas ${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
+		fi
 	#clean out sites with all gaps and 'n's, make sure to skip the lines with names
 		sed -e '/>/!s/[nN]/\-/g' ${PREFIX}ALL_masked_aligned_$LOCUS.fasta | \
 		seaview -convert -output_format fasta -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta -del_gap_only_sites -
 		seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.nex ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta
 }
 export -f alignLocusBySample
+
 #function to make consensus sequences from aligned fasta files
 mkConsensusFasta(){
 	#assign arguments to variables
@@ -139,12 +176,10 @@ mkConsensusFasta(){
 #function to maximize the number of bp retained at the expense of retaining individuals
 maximizeBP(){
 	#read arguments into variables
-	local PREFIX=$1
-	local LOCUS=$2
-	local pctMissCall=$3
-
-	Rscript maximizeBP.R ${PREFIX}ALL_masked_aligned_clean_eye_$LOCUS $pctMissCall
-	seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_eye_${LOCUS}_$pctMissCall.nex ${PREFIX}ALL_masked_aligned_clean_eye_${LOCUS}_$pctMissCall.fasta
+	local INFILE=$1
+	local pctMissCall=$2
+	Rscript maximizeBP.R ${INFILE%.*} $pctMissCall
+	seaview -convert -output_format nexus -o ${INFILE%.*}_$pctMissCall.nex ${INFILE%.*}_$pctMissCall.fasta
 }
 
 
