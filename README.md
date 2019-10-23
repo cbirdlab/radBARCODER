@@ -131,7 +131,7 @@ bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenP
 #### 6. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 5
 
 
-#### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals
+#### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals, then goto step 5.
 
 dependencies: R (seqinr, stringr)
 
