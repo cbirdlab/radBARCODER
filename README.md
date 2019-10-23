@@ -71,17 +71,17 @@ This should result in a `vcf.gz` and a `masked_consensus.fasta` for every indivi
 
 #### 4. Select a portion of the genomes and `align` it across individuals
 
-Dependencies: ddocent mafft seaview 
+Dependencies: ddocent pagan seaview 
 
 ```bash
 #POSITIONS=60-550,6680-7020	#start and end positions of mtDNA fragment to excise, readable by cut -f 
 #LOCUS="12S-COI"	#name of locus
 #POSITIONS=40-200
-#LOCUS="tRNA-Phe-12S"
+POSITIONS=5665-5970
+LOCUS="COI"#LOCUS="tRNA-Phe-12S"
 #POSITIONS=10000-10500
 #LOCUS="tRNA-Arg-ND4L-ND4"
-#POSITIONS=1-16797
-#LOCUS="mtGenome"
+
 
 #CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
 #PREFIX=Test	#prefix on files created
@@ -90,17 +90,18 @@ Dependencies: ddocent mafft seaview
 #GENBANKFASTA=""	#name of fasta file with additional sequences from genbank to include in alignment
 
 CUTOFFS=".Hspil.NC_023222"
-POSITIONS=5685-5970
-LOCUS="COI"
+POSITIONS=1-16797
+LOCUS="mtGenome"
 PREFIX=Test_
 THREADS=8
 mtGenPATTERN="reference.H*fasta"
 GENBANKFASTA=""
-
-bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS $mtGenPATTERN $GENBANKFASTA
+bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS "$mtGenPATTERN" $GENBANKFASTA
 ```
 
+#### 5. Make network with `popart` 
 
+Popart
 
 
 
