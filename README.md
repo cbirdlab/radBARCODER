@@ -120,7 +120,7 @@ THREADS=8
 mtGenPATTERN="reference.H*fasta"
 GENBANKFASTA=""
 LONGALIGNMENT=FALSE
-bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS "$mtGenPATTERN" $GENBANKFASTA
+bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $GENBANKFASTA
 ```
 
 #### 5. Make network with `PopArt` 
@@ -133,14 +133,14 @@ bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS "$mtGenP
 
 #### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals
 
+dependencies: R (seqinr, stringr)
+
+Set the PCT varable between 1 and 99, where it is the amount of allowable missing data. I recommend trying 10,25, and 50 to start with.  Histograms and culled alignments are output.  As the percent missing data goes down, the number of sequences retained also goes down, and the number of bp that are shared across all sequences goes up.
 
 ```bash
-CUTOFFS=".Hspil.NC_023222"
-PREFIX=Test_
-THREADS=8
-LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
-bash radBARCODER.bash maximizeBP $CUTOFFS $THREADS $PREFIX $LOCUS
-
+FASTA="Test_ALL_masked_aligned_clean_tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4.fasta"
+PCT=10
+bash radBARCODER.bash maximizeBP $FASTA $PCT
 ```
 
 
