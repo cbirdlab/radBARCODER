@@ -54,7 +54,7 @@ NC_023222               Cutoff2 (integer)                                       
 
 #### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
 
-You should `module load ddocent` on your hpc to get the required software for `bam2fasta`
+dependencies: bedtools bcftools (fyi, both are required by ddocent)
 
 ```bash
 CUTOFFS=".Hspil.NC_023222"							#dDocent cutoffs used for reference genome
@@ -71,7 +71,7 @@ This should result in a `vcf.gz` and a `masked_consensus.fasta` for every indivi
 
 #### 4. Select a portion of the genomes and `align` it across individuals
 
-Dependencies: ddocent pagan seaview 
+Dependencies: pagan mafft seaview 
 
 You can specify which positions to target to make alignments, including disjunct positions. For example, if you want to specify positions 1-10, then:
 
@@ -125,7 +125,7 @@ bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $POSITIONS $LOCUS "$mtGenP
 
 #### 5. Make network with `PopArt` 
 
-[`PopArt`](http://popart.otago.ac.nz/index.shtml), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.
+[`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.
 
 
 #### 6. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 5
