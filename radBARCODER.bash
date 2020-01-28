@@ -9,14 +9,15 @@
 
 #save commandline arguments to variables
 	FUNKTION=$1
-	CUTOFFS=$2
-	THREADS=$3
-	PREFIX=$4
-	LOCUS=$5
-	POSITIONS=$6
-	mtGenPATTERN=$7
-	GENBANK=$8
-	LONGALIGNMENT=$9
+	REF=$2
+	bamPATTERN=$3
+	THREADS=$4
+	PREFIX=$5
+	LOCUS=$6
+	POSITIONS=$7
+	mtGenPATTERN=$8
+	GENBANK=$9
+	LONGALIGNMENT=$10
 
 #user-defined variables
 # if [ -z "$THREADS" ]; then THREADS=8 ; fi
@@ -27,9 +28,10 @@
 # if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
 
 #set other variables
-REF=reference${CUTOFFS}.fasta
-bamPATTERN=$CUTOFFS-RG
-IDs=($(ls *$bamPATTERN.bam | sed "s/$bamPATTERN\.bam//g"))
+#REF=reference${CUTOFFS}.fasta
+#bamPATTERN=$CUTOFFS-RG
+IDs=($(ls *$bamPATTERN | sed "s/$bamPATTERN//g"))
+bamPATTERN=${bamPATTERN%.*}
 LONGALIGNMENT=$(echo $LONGALIGNMENT | tr [a-z] [A-Z])
 
 if [ "$FUNKTION" == "bam2fasta" ]; then
