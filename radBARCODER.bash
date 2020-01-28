@@ -9,7 +9,8 @@
 
 #save commandline arguments to variables
 	FUNKTION=$1
-	CUTOFFS=$2
+#	CUTOFFS=$2
+	bamPATTERN=$2
 	THREADS=$3
 	PREFIX=$4
 	LOCUS=$5
@@ -28,7 +29,7 @@
 
 #set other variables
 REF=reference${CUTOFFS}.fasta
-bamPATTERN=$CUTOFFS-RG
+#bamPATTERN=$CUTOFFS-RG
 IDs=($(ls *$bamPATTERN.bam | sed "s/$bamPATTERN\.bam//g"))
 LONGALIGNMENT=$(echo $LONGALIGNMENT | tr [a-z] [A-Z])
 
