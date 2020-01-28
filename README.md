@@ -135,15 +135,15 @@ Update the following variable assignments and run `radBARCODER`:
 #mtGenPATTERN="reference.H*fasta"  #pattern match for fasta files with mito genomes to include in alignment
 #GENBANKFASTA=""  #name of fasta file with additional sequences from genbank to include in alignment
 
-CUTOFFS=".Hspil.NC_023222"
+bamPATTERN=".Hspil.NC_023222.bam"
 POSITIONS=40-200,5665-5970,10000-10500
 LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
 PREFIX=Test_
 THREADS=8
 mtGenPATTERN="reference.H*fasta"
 GENBANKFASTA=""
-LONGALIGNMENT=FALSE
-bash radBARCODER.bash align $REF $CUTOFFS $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $GENBANKFASTA
+
+bash radBARCODER.bash align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $GENBANKFASTA
 ```
 
 #### 5. Make network with `PopArt` 
