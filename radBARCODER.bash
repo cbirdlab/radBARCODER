@@ -30,7 +30,7 @@
 #set other variables
 #REF=reference${CUTOFFS}.fasta
 #bamPATTERN=$CUTOFFS-RG
-IDs=($(ls *$bamPATTERN | sed "s/$bamPATTERN//g"))
+IDs=($(ls *$bamPATTERN | sed "s/$bamPATTERN//g" | grep -v '^cat'))
 bamPATTERN=${bamPATTERN%.*}
 LONGALIGNMENT=$(echo $LONGALIGNMENT | tr [a-z] [A-Z])
 
