@@ -94,7 +94,7 @@ Update the following variable assignments and run `radBARCODER`:
 
 ```bash
 REF=reference.Hspil.NC_023222.fasta  #Name of reference genome
-bamPATTERN=Hspil.NC_023222-RG        #Pattern to id the bam files for each individual
+bamPATTERN=Hspil.NC_023222-RG.bam    #Pattern to id the bam files for each individual
 THREADS=8                            #number of processors to use for parallel operations
 bash radBARCODER.bash bam2fasta $REF $bamPATTERN $THREADS
 ```
@@ -143,7 +143,7 @@ THREADS=8
 mtGenPATTERN="reference.H*fasta"
 GENBANKFASTA=""
 LONGALIGNMENT=FALSE
-bash radBARCODER.bash align $CUTOFFS $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $GENBANKFASTA
+bash radBARCODER.bash align $REF $CUTOFFS $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $GENBANKFASTA
 ```
 
 #### 5. Make network with `PopArt` 
@@ -169,7 +169,7 @@ Update the following variable assignments and run `radBARCODER`:
 ```bash
 FASTA="Test_ALL_masked_aligned_clean_tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4.fasta"
 PCT=10
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+bash radBARCODER.bash maximizeBP $REF $FASTA $PCT
 ```
 
 
