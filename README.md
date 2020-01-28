@@ -76,7 +76,7 @@ From here forward, you'll be running the `radBARCODER.bash` script in `bash`.  I
 You need to clone this repository to your computer:
 
 ```bash
-https://github.com/cbirdlab/radBARCODER.git   #html
+git clone https://github.com/cbirdlab/radBARCODER.git   #html
 ```
 
 Then you will need to copy all scripts in the repo ending in `bash` or `R` to your project directory:
