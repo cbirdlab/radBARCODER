@@ -93,9 +93,9 @@ cp *R PathToProjectDir
 Update the following variable assignments and run `radBARCODER`:
 
 ```bash
-CUTOFFS=".Hspil.NC_023222"  #dDocent cutoffs used for reference genome
+bamPATTERN=".Hspil.NC_023222-RG"  #Pattern to id the bam files for each individual
 THREADS=8  #number of processors to use for parallel operations
-bash radBARCODER.bash bam2fasta $CUTOFFS $THREADS
+bash radBARCODER.bash bam2fasta $bamPATTERN $THREADS
 ```
 
 This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual.  
