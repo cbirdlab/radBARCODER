@@ -77,8 +77,7 @@ export -f bam2fasta
 
 #function to get locus from masked consensus sequences, mito genomes, and NCBI nucleotide records, clean and align
 alignLocusBySample(){
-	echo ""
-	echo `date` ALIGNING...
+	
 	#assign arguments to variables
 		local PREFIX=$1
 		local THREADS=$2
@@ -93,24 +92,38 @@ alignLocusBySample(){
 		# local IDs=("${!name}")
 
 	#get locus from all individuals and align, $POSITIONS determines the locus
+	echo ""; echo `date` EXTRACTING POSITIONS $POSITIONS FOR ALIGNMENT...
 		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}RAD_masked_$LOCUS.fasta
+	
 	#remove individuals with no sequences or all N
+	echo ""; echo `date` REMOVING INDIVIDUALS WITH NO NUCLEOTIDES CALLED...
 		sed 's/^NN*$//g' ${PREFIX}RAD_masked_$LOCUS.fasta | grep -P -B 1 '^[ACTGN@]+$' | grep -v '\-\-' > ${PREFIX}RAD_masked_${LOCUS}_clean.fasta
+	
 	#make fasta from mtGenome sequences
-		if [ ! -z "$mtGenPATTERN" ]; then
-			ls $mtGenPATTERN | sed 's/.fasta//g' | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}MtGenomes_$LOCUS.fasta
-		fi
+	if [ ! -z "$mtGenPATTERN" ]; then
+		echo ""; echo `date` GATHERING ALL mtGENOMEs WITH PATTERN=$mtGenPATTERN & EXTRACTING POSITIONS $POSITIONS
+		ls $mtGenPATTERN | sed 's/.fasta//g' | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}MtGenomes_$LOCUS.fasta
+	else
+		echo ""; echo `date` NO mtGENOMES SPECIFIED, CONTINUING WITHOUT THEM...
+	fi
 	#Make fasta from other NCBI nucleotide sequences
 		#need to code, right now, just download as 1 big fasta
+		
 	#Combine fastas, make sure to add genbank nucleotide recs as neccessary
-		#echo $GENBANK
+		if [ ! -z "$GENBANK" ]; then
+			echo ""; echo `date` ADDING $GENBANK SEQUENCES FROM GENBANK...
+		else
+			echo ""; echo `date` NO ADDITIONAL GENBANK SEQUENCES SPECIFIED, CONTINUING WITHOUT THEM...
+		fi
+		echo ""; echo `date` CONCATENATING FASTAs...
 		cat ${PREFIX}MtGenomes_$LOCUS.fasta ${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ${PREFIX}ALL_masked_$LOCUS.fasta 
 	#Align all_*.fasta
+	echo ""; echo `date` ALIGNING SEQUENCES WITH $(if [ "$LONGALIGNMENT" == "TRUE" ]; then echo -n MAFFT; else echo -n pagan2; fi)...
 		#clustalw -infile=${PREFIX}ALL_masked_$LOCUS.fasta -align -type=DNA -output=NEXUS -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.nex
 		#clustalo -infile=${PREFIX}ALL_masked_$LOCUS.fasta -t DNA --outfmt=fa -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.fasta --threads $THREADS 
 		#mafft --thread $THREADS ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 		#mafft --thread $THREADS --ep 0.123 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
-		echo LONGALIGNMENT=$LONGALIGNMENT
+		echo ""
 		if [ "$LONGALIGNMENT" == "TRUE" ] || [ "$LONGALIGNMENT" == "T" ]; then
 			mafft --thread $THREADS --globalpair --maxiterate 1000 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 		else 
