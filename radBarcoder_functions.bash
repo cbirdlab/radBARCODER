@@ -77,6 +77,8 @@ export -f bam2fasta
 
 #function to get locus from masked consensus sequences, mito genomes, and NCBI nucleotide records, clean and align
 alignLocusBySample(){
+	echo ""
+	echo `date` ALIGNING...
 	#assign arguments to variables
 		local PREFIX=$1
 		local THREADS=$2
