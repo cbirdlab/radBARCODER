@@ -50,7 +50,7 @@ echo ""
 #REF=reference${CUTOFFS}.fasta
 #bamPATTERN=$CUTOFFS-RG
 IDs=($(ls *$bamPATTERN | sed "s/$bamPATTERN//g" | grep -v '^cat'))
-echo ""; echo `date` SAMPLES BEING PROCESSED: 
+echo ""; echo `date` $(echo ${IDs[@]} | tr " " "\n" | wc -l) SAMPLES BEING PROCESSED: 
 echo ${IDs[@]}
 echo ""
 bamPATTERN=${bamPATTERN%.*}
