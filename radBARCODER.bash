@@ -16,9 +16,10 @@ PREFIX=$5
 LOCUS=$6
 POSITIONS=$7
 mtGenPATTERN=$8
-GENBANK=$9
-LONGALIGNMENT=${10}
+LONGALIGNMENT=${9}
+GENBANK=${10}
 
+echo ""
 echo FUNKTION=$FUNKTION
 echo REF=$REF
 echo bamPATTERN=$bamPATTERN
@@ -29,6 +30,8 @@ echo POSITIONS=$POSITIONS
 echo mtGenPATTERN=$mtGenPATTERN
 echo GENBANK=$GENBANK
 echo LONGALIGNMENT=$LONGALIGNMENT
+echo ""
+
 #user-defined variables
 # if [ -z "$THREADS" ]; then THREADS=8 ; fi
 # if [ -z "$CUTOFFS" ]; then CUTOFFS=".Hspil.NC_023222" ; fi	#dDocent cutoffs used for reference genome
