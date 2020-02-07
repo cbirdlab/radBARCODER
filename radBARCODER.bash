@@ -19,6 +19,14 @@ mtGenPATTERN=$8
 LONGALIGNMENT=${9}
 GENBANK=${10}
 
+#user-defined variables
+# if [ -z "$THREADS" ]; then THREADS=8 ; fi
+# if [ -z "$CUTOFFS" ]; then CUTOFFS=".Hspil.NC_023222" ; fi	#dDocent cutoffs used for reference genome
+# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
+# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
+# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
+# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
+
 echo ""; 
 echo "#########################################################################"
 echo `date` RUNNING radBARCODER $(echo $FUNKTION | tr [a-z] [A-Z])...
@@ -37,14 +45,6 @@ echo the ls pattern shared by all mtGenomes that will be aligned  mtGenPATTERN=.
 echo the aligner that will be used                                LONGALIGNMENT=.$LONGALIGNMENT 
 echo the GenBank sequences that should also be aligned            GENBANK=.......$GENBANK
 echo ""
-
-#user-defined variables
-# if [ -z "$THREADS" ]; then THREADS=8 ; fi
-# if [ -z "$CUTOFFS" ]; then CUTOFFS=".Hspil.NC_023222" ; fi	#dDocent cutoffs used for reference genome
-# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
-# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
-# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
-# if [ -z "$PREFIX" ]; then PREFIX="" ; fi	#prefix on files created
 
 #set other variables
 #REF=reference${CUTOFFS}.fasta
