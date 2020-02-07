@@ -24,18 +24,18 @@ echo "#########################################################################"
 echo `date` RUNNING radBARCODER $(echo $FUNKTION | tr [a-z] [A-Z])...
 echo "#########################################################################"
 
+echo ""; echo `date` VARIABLES READ IN:
 echo ""
-echo `date` VARIABLES READ IN:
-echo FUNKTION=......$FUNKTION
-echo REF=...........$REF
-echo bamPATTERN=....$bamPATTERN
-echo THREADS=.......$THREADS
-echo PREFIX=........$PREFIX
-echo LOCUS=.........$LOCUS
-echo POSITIONS=.....$POSITIONS
-echo mtGenPATTERN=..$mtGenPATTERN
-echo LONGALIGNMENT=.$LONGALIGNMENT
-echo GENBANK=.......$GENBANK
+echo the function that will be run                                FUNKTION=......$FUNKTION
+echo the reference genome used to map the reads                   REF=...........$REF
+echo the ls pattern shared by all bam files                       bamPATTERN=....$bamPATTERN
+echo the number of cpu cores for the task                         THREADS=.......$THREADS
+echo the characters added to every file created                   PREFIX=........$PREFIX
+echo the name of the locus or loci                                LOCUS=.........$LOCUS
+echo the nucleotide positions in the reference genome to consider POSITIONS=.....$POSITIONS     
+echo the ls pattern shared by all mtGenomes that will be aligned  mtGenPATTERN=..$mtGenPATTERN  
+echo the aligner that will be used                                LONGALIGNMENT=.$LONGALIGNMENT 
+echo the GenBank sequences that should also be aligned            GENBANK=.......$GENBANK
 echo ""
 
 #user-defined variables
