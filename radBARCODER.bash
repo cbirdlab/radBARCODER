@@ -17,7 +17,7 @@ LOCUS=$6
 POSITIONS=$7
 mtGenPATTERN=$8
 GENBANK=$9
-LONGALIGNMENT=$10
+LONGALIGNMENT=${10}
 
 #user-defined variables
 # if [ -z "$THREADS" ]; then THREADS=8 ; fi
