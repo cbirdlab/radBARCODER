@@ -66,6 +66,10 @@ elif [ "$FUNKTION" == "align" ]; then
 	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $GENBANK
 elif [ "$FUNKTION" == "consensus" ]; then
 	#make consensus sequences from aligned fasta files
+		outIDs=$2
+		normIDs=$3
+		SITES=$7
+		cvgForCall=$8		
 		mkConsensusFasta outIDs normIDs SITES $PREFIX $LOCUS $THREADS $cvgForCall
 elif [ "$FUNKTION" == "maximizeBP" ]; then
 	#maximize the number of bp retained at the expense of retaining individuals
