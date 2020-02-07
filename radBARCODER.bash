@@ -28,8 +28,8 @@ echo PREFIX=$PREFIX
 echo LOCUS=$LOCUS
 echo POSITIONS=$POSITIONS
 echo mtGenPATTERN=$mtGenPATTERN
-echo GENBANK=$GENBANK
 echo LONGALIGNMENT=$LONGALIGNMENT
+echo GENBANK=$GENBANK
 echo ""
 
 #user-defined variables
@@ -48,9 +48,7 @@ echo Samples being processed:
 echo ${IDs[@]}
 echo ""
 bamPATTERN=${bamPATTERN%.*}
-echo LONGALIGNMENT=$LONGALIGNMENT
 LONGALIGNMENT=$(echo $LONGALIGNMENT | tr [a-z] [A-Z])
-echo LONGALIGNMENT=$LONGALIGNMENT
 
 if [ "$FUNKTION" == "bam2fasta" ]; then
 	#create fasta sequences of mtGenome for each individual using individually masked reference genomes
@@ -59,7 +57,7 @@ if [ "$FUNKTION" == "bam2fasta" ]; then
 	cat *${bamPATTERN}_masked_consensus.fasta > all${bamPATTERN}_masked_consensus.fasta
 elif [ "$FUNKTION" == "align" ]; then
 	#get locus of choice from masked consensus seqs, mito genomes, and NCBI nucleotide seqs, clean and align
-	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $GENBANK $LONGALIGNMENT
+	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $GENBANK
 elif [ "$FUNKTION" == "consensus" ]; then
 	#make consensus sequences from aligned fasta files
 		mkConsensusFasta outIDs normIDs SITES $PREFIX $LOCUS $THREADS $cvgForCall
