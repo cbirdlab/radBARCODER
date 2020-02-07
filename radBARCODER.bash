@@ -5,19 +5,19 @@
 #haplotype networks and phylogenetic reconstructions
 
 #source the functions
-	source radBarcoder_functions.bash
+source radBarcoder_functions.bash
 
 #save commandline arguments to variables
-	FUNKTION=$1
-	REF=$2
-	bamPATTERN=$3
-	THREADS=$4
-	PREFIX=$5
-	LOCUS=$6
-	POSITIONS=$7
-	mtGenPATTERN=$8
-	GENBANK=$9
-	LONGALIGNMENT=$10
+FUNKTION=$1
+REF=$2
+bamPATTERN=$3
+THREADS=$4
+PREFIX=$5
+LOCUS=$6
+POSITIONS=$7
+mtGenPATTERN=$8
+GENBANK=$9
+LONGALIGNMENT=$10
 
 #user-defined variables
 # if [ -z "$THREADS" ]; then THREADS=8 ; fi
@@ -44,7 +44,7 @@ if [ "$FUNKTION" == "bam2fasta" ]; then
 	cat *${bamPATTERN}_masked_consensus.fasta > all${bamPATTERN}_masked_consensus.fasta
 elif [ "$FUNKTION" == "align" ]; then
 	#get locus of choice from masked consensus seqs, mito genomes, and NCBI nucleotide seqs, clean and align
-	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $GENBANK $LONGALIGNMENT
+	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $GENBANK #$LONGALIGNMENT
 elif [ "$FUNKTION" == "consensus" ]; then
 	#make consensus sequences from aligned fasta files
 		mkConsensusFasta outIDs normIDs SITES $PREFIX $LOCUS $THREADS $cvgForCall
