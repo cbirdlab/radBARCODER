@@ -19,17 +19,23 @@ mtGenPATTERN=$8
 LONGALIGNMENT=${9}
 GENBANK=${10}
 
+echo ""; 
+echo "#########################################################################"
+echo `date` RUNNING radBARCODER $(echo $FUNKTION | tr [a-z] [A-Z])...
+echo "#########################################################################"
+
 echo ""
-echo FUNKTION=$FUNKTION
-echo REF=$REF
-echo bamPATTERN=$bamPATTERN
-echo THREADS=$THREADS
-echo PREFIX=$PREFIX
-echo LOCUS=$LOCUS
-echo POSITIONS=$POSITIONS
-echo mtGenPATTERN=$mtGenPATTERN
-echo LONGALIGNMENT=$LONGALIGNMENT
-echo GENBANK=$GENBANK
+echo `date` VARIABLES READ IN:
+echo FUNKTION=......$FUNKTION
+echo REF=...........$REF
+echo bamPATTERN=....$bamPATTERN
+echo THREADS=.......$THREADS
+echo PREFIX=........$PREFIX
+echo LOCUS=.........$LOCUS
+echo POSITIONS=.....$POSITIONS
+echo mtGenPATTERN=..$mtGenPATTERN
+echo LONGALIGNMENT=.$LONGALIGNMENT
+echo GENBANK=.......$GENBANK
 echo ""
 
 #user-defined variables
@@ -44,7 +50,7 @@ echo ""
 #REF=reference${CUTOFFS}.fasta
 #bamPATTERN=$CUTOFFS-RG
 IDs=($(ls *$bamPATTERN | sed "s/$bamPATTERN//g" | grep -v '^cat'))
-echo Samples being processed: 
+echo ""; echo `date` SAMPLES BEING PROCESSED: 
 echo ${IDs[@]}
 echo ""
 bamPATTERN=${bamPATTERN%.*}
@@ -68,3 +74,8 @@ elif [ "$FUNKTION" == "maximizeBP" ]; then
 		echo; echo `date` "Be sure to check the fasta alignment by eye as small errors do occur"
 		maximizeBP $FASTA $PCT
 fi
+
+echo ""; 
+echo "#########################################################################"
+echo `date` radBARCODER $(echo $FUNKTION | tr [a-z] [A-Z]) COMPLETED
+echo "#########################################################################"
