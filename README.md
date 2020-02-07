@@ -157,6 +157,13 @@ bash radBARCODER.bash align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS 
 
 Not vetted for mass consumption yet
 
+```bash
+outIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
+normIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
+SITES=$(echo -e At"\t"Pk"\t"Kr"\t"St)
+cvgForCall=1
+bash radBARCODER.bash consensus $outIDs $normIDs $THREADS $PREFIX $LOCUS $SITES $cvgForCall
+```
 
 #### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals, then goto step 5.
 
