@@ -71,6 +71,8 @@ This will create mildly filtered `RG.bam` files for each individual. These are y
 
 #### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
 
+*Dependencies*: [`parallel`](https://www.gnu.org/software/parallel/)
+
 From here forward, you'll be running the `radBARCODER.bash` script in `bash`.  It is highly likely that they can be completed on your laptop, but you will need the required software. 
 
 You need to clone this repository to your computer:
