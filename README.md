@@ -94,7 +94,7 @@ Update the following variable assignments and run `radBARCODER`:
 
 ```bash
 REF=reference.Hspil.NC_023222.fasta  #Name of reference genome
-bamPATTERN=Hspil.NC_023222-RG.bam    #Pattern to id the bam files for each individual
+.bamPATTERN=Hspil.NC_023222-RG.bam    #Pattern to id the bam files for each individual
 THREADS=8                            #number of processors to use for parallel operations
 bash radBARCODER.bash bam2fasta $REF $bamPATTERN $THREADS
 ```
