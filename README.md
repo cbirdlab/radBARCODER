@@ -3,7 +3,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 ---
 
-## How it works
+## Quick Start
 
 Follow these steps to make mtGenomes from each individual in your RAD data set.
 
