@@ -66,7 +66,7 @@ bash dDocentHPC.bash mkBAM config.4.all
 bash dDocentHPC.bash fltrBAM config.4.all
 ```
 
-This will create mildly filtered `RG.bam` files for each individual. These are your alignment maps are automatically used in downstream processing.
+This will create mildly filtered `RG.bam` files for each individual. These alignment maps are used in downstream processing.
 
 
 #### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
