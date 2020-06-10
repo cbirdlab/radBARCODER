@@ -57,14 +57,14 @@ bam2fasta(){
 		local ID=$1							#*_Pfa*
 		local ID2=$1$2						#*_Pfa*$CUTOFFS-FLTR_F4
 		local REF=$3						#unmasked reference genome
-	#calculate coverage at each base from bam file and return a bed file with positions that have no coverage
-		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t3$' > $ID2.bed 
+	#calculate coverage at each base from bam file and return a bed file with positions that have too little coverage
+		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t[0-1]$' > $ID2.bed 
 	#create masked fasta for each individual
 		bedtools maskfasta -fi $REF -fo ${ID2}_masked_ref.fasta -bed $ID2.bed 
 	#make vcf files
-		bcftools mpileup --threads 7 -d 250 -q 30 -Q 20 -m 2 -A -O z -o ${ID2}_masked_pile.vcf.gz -f ${ID2}_masked_ref.fasta ${ID2}.bam
+		bcftools mpileup --threads 1 -d 250 -q 60 -Q 20 -m 2 -A -O z -o ${ID2}_masked_pile.vcf.gz -f ${ID2}_masked_ref.fasta ${ID2}.bam
 	#call genotypes in vcf, force ploidy=haploid
-		bcftools call --threads 7 -m --ploidy 1 -O z -o ${ID2}_masked_calls.vcf.gz ${ID2}_masked_pile.vcf.gz
+		bcftools call --threads 1 -m --ploidy 1 -O z -o ${ID2}_masked_calls.vcf.gz ${ID2}_masked_pile.vcf.gz
 	#combine snps and indels into 1 multiallelic call
 		bcftools norm -f ${ID2}_masked_ref.fasta -m +any -O z -o ${ID2}_masked_calls_normalized.vcf.gz ${ID2}_masked_calls.vcf.gz
 		tabix ${ID2}_masked_calls_normalized.vcf.gz
