@@ -150,6 +150,8 @@ GENBANKFASTA=""
 bash radBARCODER.bash align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
+It is important to check view the alignment and edit as necessary. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. 
+
 #### 5. Make network with `PopArt` 
 
 [`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.  [Precompiled, but outdated versions of PopArt](http://popart.otago.ac.nz/index.shtml)
