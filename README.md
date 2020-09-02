@@ -139,7 +139,7 @@ Update the following variable assignments and run `radBARCODER`:
 #GENBANKFASTA=""  #name of fasta file with additional sequences from genbank to include in alignment
 
 REF=reference.Hspil.NC_023222.fasta  #Name of reference genome
-bamPATTERN=".Hspil.NC_023222.bam"
+bamPATTERN=.Hspil.NC_023222.bam
 POSITIONS=40-200,5665-5970,10000-10500
 LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
 PREFIX=Test_
