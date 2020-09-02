@@ -150,7 +150,7 @@ GENBANKFASTA=""
 bash radBARCODER.bash align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
-It is important to check view the alignment and edit as necessary. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. 
+It is important to check the alignment and edit as necessary. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. 
 
 #### 5. Make network with `PopArt` 
 
