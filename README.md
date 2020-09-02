@@ -135,7 +135,7 @@ Update the following variable assignments and run `radBARCODER`:
 #CUTOFFS=".Hspil.NC_023222"  #dDocent cutoffs used for reference genome
 #PREFIX=Test  #prefix on files created
 #THREADS=8  # number of cores to use
-#mtGenPATTERN="reference.H*fasta"  #pattern match for fasta files with mito genomes to include in alignment
+#mtGenPATTERN="*mtGenome.fasta"  #pattern match for fasta files with mito genomes to include in alignment
 #GENBANKFASTA=""  #name of fasta file with additional sequences from genbank to include in alignment
 
 REF=reference.Hspil.NC_023222.fasta  #Name of reference genome
@@ -144,7 +144,7 @@ POSITIONS=40-200,5665-5970,10000-10500
 LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
 PREFIX=Test_
 THREADS=8
-mtGenPATTERN="reference.H*fasta"
+mtGenPATTERN="*mtGenome.fasta"
 GENBANKFASTA=""
 
 bash radBARCODER.bash align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
