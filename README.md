@@ -181,8 +181,37 @@ Update the following variable assignments and run `radBARCODER`:
 
 ```bash
 FASTA="Test_ALL_masked_aligned_clean_tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4.fasta"
+PCT=99
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=95
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=90
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=85
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=80
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=75
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=70
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=50
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=30
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=25
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=20
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=15
+bash radBARCODER.bash maximizeBP $FASTA $PCT
 PCT=10
 bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=5
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+PCT=1
+bash radBARCODER.bash maximizeBP $FASTA $PCT
+
 ```
 
 
