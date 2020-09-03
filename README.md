@@ -214,5 +214,6 @@ bash radBARCODER.bash maximizeBP $FASTA $PCT
 
 ```
 
+Despite the messages, if the files are created, then this worked as intended.
 
 
