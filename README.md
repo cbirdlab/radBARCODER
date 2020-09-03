@@ -162,6 +162,9 @@ It is important to check the alignment and edit as necessary. I recommend [`seav
 Not vetted for mass consumption yet
 
 ```bash
+PREFIX=concensusAlignment_
+LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
+THREADS=32
 outIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
 normIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
 SITES=$(echo -e At"\t"Pk"\t"Kr"\t"St)
