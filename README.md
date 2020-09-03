@@ -161,16 +161,21 @@ It is important to check the alignment and edit as necessary. I recommend [`seav
 
 Not vetted for mass consumption yet
 
+This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file.
+
 ```bash
 PREFIX=concensusAlignment_
 LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
 THREADS=32
-outIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
-normIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
-SITES=$(echo -e At"\t"Pk"\t"Kr"\t"St)
+nontargetIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
+targetIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
+POPS=$(echo -e At"\t"Pk"\t"Kr"\t"St)
 cvgForCall=1
-bash radBARCODER.bash consensus $outIDs $normIDs $THREADS $PREFIX $LOCUS $SITES $cvgForCall
+bash radBARCODER.bash consensus $nontargetIDs $targetIDs $THREADS $PREFIX $LOCUS $POPS $cvgForCall
 ```
+
+Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
+
 
 #### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals, then goto step 5.
 
