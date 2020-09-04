@@ -63,7 +63,7 @@ if [ "$FUNKTION" == "bam2fasta" ]; then
 	cat *${bamPATTERN}_masked_consensus.fasta > all${bamPATTERN}_masked_consensus.fasta
 elif [ "$FUNKTION" == "align" ]; then
 	#get locus of choice from masked consensus seqs, mito genomes, and NCBI nucleotide seqs, clean and align
-	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $GENBANK
+	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $GENBANK $REF
 elif [ "$FUNKTION" == "consensus" ]; then
 	#make consensus sequences from aligned fasta files
 		outIDs=$2
