@@ -103,7 +103,7 @@ bash radBARCODER.bash bam2fasta $REF $bamPATTERN $THREADS
 
 This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual. Note that heterozygous positions are set to default to the reference allele. This behavior can be modified in `radBarcodder_functions.bash` at the line beginning with `bcftools consensus`. 
 
-Hard coded strigencies are at least:
+Hard coded strigencies are:
 
 * depth of coverage >= 1
 
