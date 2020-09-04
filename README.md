@@ -101,7 +101,15 @@ THREADS=8                            #number of processors to use for parallel o
 bash radBARCODER.bash bam2fasta $REF $bamPATTERN $THREADS
 ```
 
-This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual. Note that heterozygous positions are set to default to the reference allele. This behavior can be modified in `radBarcodder_functions.bash` at the line beginning with `bcftools consensus`.
+This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual. Note that heterozygous positions are set to default to the reference allele. This behavior can be modified in `radBarcodder_functions.bash` at the line beginning with `bcftools consensus`. 
+
+Hard coded strigencies are at least:
+
+* depth of coverage >= 1
+
+* base call phred quality >= 20
+
+* mapping quality >= 30
 
 
 #### 4. Select a portion of the genomes and `align` it across individuals
