@@ -62,9 +62,9 @@ bam2fasta(){
 	#create masked fasta for each individual
 		bedtools maskfasta -fi $REF -fo ${ID2}_masked_ref.fasta -bed $ID2.bed
 	#make vcf files
-		bcftools mpileup --threads 7 -d 30000 -q 30 -Q 20 -A -O z -o ${ID2}_masked_pile.vcf.gz -f ${ID2}_masked_ref.fasta ${ID2}.bam
+		bcftools mpileup --threads 1 -d 30000 -q 30 -Q 20 -A -O z -o ${ID2}_masked_pile.vcf.gz -f ${ID2}_masked_ref.fasta ${ID2}.bam
 	#call genotypes in vcf, force ploidy=haploid
-		bcftools call --threads 7 -m --ploidy 1 -O z -o ${ID2}_masked_calls.vcf.gz ${ID2}_masked_pile.vcf.gz
+		bcftools call --threads 1 -m --ploidy 1 -O z -o ${ID2}_masked_calls.vcf.gz ${ID2}_masked_pile.vcf.gz
 	#combine snps and indels into 1 multiallelic call
 		bcftools norm -f ${ID2}_masked_ref.fasta -m +any -O z -o ${ID2}_masked_calls_normalized.vcf.gz ${ID2}_masked_calls.vcf.gz
 		tabix ${ID2}_masked_calls_normalized.vcf.gz
