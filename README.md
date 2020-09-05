@@ -4,9 +4,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 ---
 
-## Quick Start
-
-#### 0. Prepare your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files and a reference mitchondrial genome & install software
+## Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files, a reference mitchondrial genome & install dependencies
 
 Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for processing RAD data in unix-based computers.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
 
@@ -92,8 +90,9 @@ R
 install.packages(c("seqinr", "stringr"))
 ```
 
-Additionally, `radBARCODER` uses R.  
+---
 
+## Quick Start
 
 #### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
