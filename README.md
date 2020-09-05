@@ -523,6 +523,15 @@ Sat 05 Sep 2020 01:19:13 AM CDT radBARCODER MAXIMIZEBP COMPLETED
 #########################################################################
 ```
 
+You can also check for proper output files to confirm success:
+
+```
+$ ls -tr | tail -n3
+paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome_99.fasta
+missingCalls99.pdf
+paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome_99.nex
+```
+
 
 #### 6. Make network with `PopArt` 
 
