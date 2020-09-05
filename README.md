@@ -538,7 +538,7 @@ paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome_99.nex
 [`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.  [Precompiled, but outdated versions of PopArt](http://popart.otago.ac.nz/index.shtml)
 
 
-#### 7. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 6
+#### 7. If you didn't have much luck comparing individuals in steps 1-5, you can make meta mitochondrial genomes from groups of individuals and align those using `mkMETAGEN` and then goto step 6
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
@@ -558,7 +558,7 @@ targetIDs=$(cat Pfalcifer.txt)
 targetNAME=Pfa
 POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
 cvgForCall=1
-bash radBARCODER.bash consensus "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+bash radBARCODER.bash mkMETAGEN "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 ```
 
 Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
