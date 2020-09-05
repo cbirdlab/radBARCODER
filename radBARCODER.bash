@@ -68,7 +68,7 @@ if [ "$FUNKTION" == "bam2fasta" ]; then
 elif [ "$FUNKTION" == "align" ]; then
 	#get locus of choice from masked consensus seqs, mito genomes, and NCBI nucleotide seqs, clean and align
 	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $GENBANK $REF
-elif [ "$FUNKTION" == "consensus" ]; then
+elif [ "$FUNKTION" == "mkMETAGEN" ]; then
 	#make consensus sequences from aligned fasta files
 		nontargetIDs=$2
 		targetIDs=$3
@@ -80,7 +80,7 @@ elif [ "$FUNKTION" == "consensus" ]; then
 		nontargetNAME=$9
 		targetNAME=${10}
 		reportVARS
-		mkConsensusFasta nontargetIDs targetIDs POPS $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+		mkMetaMitoGenomes nontargetIDs targetIDs POPS $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 elif [ "$FUNKTION" == "maximizeBP" ]; then
 	#maximize the number of bp retained at the expense of retaining individuals
 		FASTA=$2
