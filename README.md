@@ -558,7 +558,7 @@ targetIDs=$(cat Pfalcifer.txt)
 targetNAME=Pfa
 POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
 cvgForCall=1
-bash radBARCODER.bash consensus "$nontargetIDs" "$targetIDs" $POPS $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+bash radBARCODER.bash consensus "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 ```
 
 Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
