@@ -49,6 +49,7 @@ echo the GenBank sequences that should also be aligned            GENBANK=......
 echo ""
 
 }
+export -f reportVARS
 
 #set other variables
 #REF=reference${CUTOFFS}.fasta
