@@ -183,7 +183,7 @@ alignLocusBySample(){
 		fixSEQ=($(awk -v x=$maxNUC '{ if ($1 < x) { print x-$1 }}' ${FILE%.*}.tsv | sort -n | uniq))
 		# use sed to add - to ends of lines
 		for i in ${fixSEQ[@]}; do
-			echo "     $i indels being added to short sequence"
+			echo "     $i indels being added to short sequences"
 			NUC=$(($maxNUC - $i))
 			insertSTRING=$(printf '%.0s-' $(seq 1 $i))
 			#echo $NUC
