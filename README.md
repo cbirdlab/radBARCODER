@@ -23,7 +23,7 @@ It is also assumed that you have a fully assembled mitochondrial genome saved as
 reference.*.*.fasta
 ```
 
-## Installation and dependencies
+## Installation and Dependencies
 
 It is up to you how to handle the radBARCODER and dDocentHPC scripts, but here I assume that you will clone fresh copies of the two repos into your project directory and run the scripts directly rather than putting them into your `$PATH`.  Clone the radBARCODER and dDocentHPC repos to your project dir:
 
@@ -34,6 +34,11 @@ cd ProjectDir
 # clone repos to your project dir as follows
 git clone https://github.com/cbirdlab/radBARCODER.git   
 git clone https://github.com/cbirdlab/dDocentHPC.git
+ 
+# set up dir
+cp dDocentHPC/config.4.all .
+cp radBARCODER/*bash .
+cp radBARCODER/*R .
 
 # assumed directory structure:
 ProjectDir
@@ -42,9 +47,18 @@ ProjectDir
  ├──pop1_ind1.R.fq.gz
  
  └──radBARCODER
+
+
 ```
 
 Goto [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. There is a script that automatically installs the software on your unix-based system. dDocentHPC was forked from [dDocent](https://www.ddocent.com) and shares many similarities but the instructions here assume you are using dDocentHPC. You can run dDocentHPC on a workstation or HPC. It is up to you whether you put the `dDocentHPC.bash` script into your `$PATH` or run it directly from the repo.  I usually clone a fresh copy to the top level of a project directory and execute it directly with `bash`.
+
+If processing ddRAD libraries using published protocols such as Peterson et al. (2012), I recommend adding 2 sequences to the `trimmomatic` adapters file.
+
+```
+# this will work on a workstation. on an HPC, run `dDocentHPC trimFQ` (see below) and view the output to see the path to the adapters file
+
+```
 
 `radBARCODER` has a few additional dependencies. Unfortunately, there is no installation script for them but it is not difficult.  I provide some commands below which should work but it is up to you to find and update the URLs to the latest versions and make sure that the unzipped tarball dir names match the provided code.
 
