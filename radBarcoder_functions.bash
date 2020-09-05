@@ -198,7 +198,7 @@ alignLocusBySample(){
 export -f alignLocusBySample
 
 #function to make consensus sequences from aligned fasta files
-mkConsensusFasta(){
+mkMetaMitoGenomes(){
 	#assign arguments to variables
 		name=$1[@]
 		local nontargetIDs=("${!name}")
@@ -246,11 +246,11 @@ mkConsensusFasta(){
 		parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${ncbiNAMES[@]} > ${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
 
 	#concatenate consensus sequences into 1 file
-		cat ${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ${PREFIX}*_masked_aligned_consensus_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_consensi_$LOCUS.fasta
+		cat ${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ${PREFIX}*_masked_aligned_consensus_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_metamitogen_$LOCUS.fasta
 	#mafft makes a bunch of sites with all indels due to a few poorly aligned sequences, remove gap only sites
-		seaview -convert -output_format fasta -o ${PREFIX}ALL_masked_aligned_clean_consensi_$LOCUS.fasta -del_gap_only_sites ${PREFIX}ALL_masked_aligned_consensi_$LOCUS.fasta
+		seaview -convert -output_format fasta -o ${PREFIX}ALL_masked_aligned_clean_metamitogen_$LOCUS.fasta -del_gap_only_sites ${PREFIX}ALL_masked_aligned_metamitogen_$LOCUS.fasta
 	#convert fasta to nexus non interleaved
-		seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_consensi_$LOCUS.nex ${PREFIX}ALL_masked_aligned_clean_consensi_$LOCUS.fasta
+		seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_metamitogen_$LOCUS.nex ${PREFIX}ALL_masked_aligned_clean_metamitogen_$LOCUS.fasta
 }
 
 #function to maximize the number of bp retained at the expense of retaining individuals
