@@ -4,7 +4,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 ---
 
-## Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files, a reference mitchondrial genome & install dependencies
+## Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files & a reference mitchondrial genome 
 
 Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for processing RAD data in unix-based computers.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
 
@@ -22,6 +22,8 @@ It is also assumed that you have a fully assembled mitochondrial genome saved as
 # no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters.
 reference.*.*.fasta
 ```
+
+## Installation and dependencies
 
 It is up to you how to handle the radBARCODER and dDocentHPC scripts, but here I assume that you will clone fresh copies of the two repos into your project directory and run the scripts directly rather than putting them into your `$PATH`.  Clone the radBARCODER and dDocentHPC repos to your project dir:
 
