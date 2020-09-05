@@ -4,25 +4,6 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 ---
 
-## Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files & a reference mitchondrial genome 
-
-Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for processing RAD data in unix-based computers.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
-
-```
-# files must end with [FR].fq.gz
-# only 1 underscore should occur, and it should delimit the population idenity and the individual identity.  
-# every individual must have a different identity
-Population_UniqueIndividualID.F.fq.gz
-Population_UniqueIndividualID.R.fq.gz
-```
-
-It is also assumed that you have a fully assembled mitochondrial genome saved as a [FASTA](https://en.wikipedia.org/wiki/FASTA) file. You should name the reference mtGenome used for mapping sequence reads as follows:
-
-```
-# no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters.
-reference.*.*.fasta
-```
-
 ## Installation and Dependencies
 
 It is up to you how to handle the radBARCODER and dDocentHPC scripts, but here I assume that you will clone fresh copies of the two repos into your project directory and run the scripts directly rather than putting them into your `$PATH`.  Clone the radBARCODER and dDocentHPC repos to your project dir:
@@ -119,14 +100,29 @@ install.packages(c("seqinr", "stringr"))
 
 ---
 
-## Quick Start
+## Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files & a reference mitchondrial genome 
 
-#### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
-
-Before running `dDocentHPC`, you should adjust the settings in the config file `config.4.all` as necessary.  `trimmomatic` is used to complete trimming which will remove low quality base calls, adapters, and reads that are too short after the removal of nucleotides.  The settings that affect reads trimmed for mapping to the mtGenome are labeled in the config as `mkBAM` signifying that these reads will be used to make the BAM files.
+Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for processing RAD data in unix-based computers.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
 
 ```
-# assumed directory structure, replace "ProjectDir" with the name of your project directory
+# files must end with [FR].fq.gz
+# only 1 underscore should occur, and it should delimit the population idenity and the individual identity.  
+# every individual must have a different identity
+ProjectDir/Population_UniqueIndividualID.F.fq.gz
+ProjectDir/Population_UniqueIndividualID.R.fq.gz
+```
+
+It is also assumed that you have a fully assembled mitochondrial genome saved as a [FASTA](https://en.wikipedia.org/wiki/FASTA) file. You should name the reference mtGenome used for mapping sequence reads as follows:
+
+```
+# no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters.
+ProjectDir/mkBAM/reference.*.*.fasta
+```
+
+Assumed directory structure:
+
+```
+$ tree ../ProjectDir
 ProjectDir
  ├──dDocentHPC
  ├──config.4.all
@@ -135,19 +131,29 @@ ProjectDir
  │   ├──cullSeqs.R
  │   ├──maximizeBP.R
  │   ├──radBARCODER.bash
- │   └──radBarcoder_functions.bash
+ │   ├──radBarcoder_functions.bash
+ │   └──reference.*.*.fasta
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
  ...
  └──radBARCODER
 ```
 
+---
+
+## Quick Start
+
+#### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
+
+Before running `dDocentHPC`, you should adjust the settings in the config file `config.4.all` as necessary.  `trimmomatic` is used to complete trimming which will remove low quality base calls, adapters, and reads that are too short after the removal of nucleotides.  The settings that affect reads trimmed for mapping to the mtGenome are labeled in the config as `mkBAM` signifying that these reads will be used to make the BAM files.
+
 ```bash
 nano config.4.all
 ```
 
-`config*` file settings:
-```bash
+relevant portion of `config.4.all`:
+
+```
 32              Number of Processors (Auto, 1, 2, 3, ..., n threads) cbirdq=40 normal=20
 120G    Maximum Memory (1G,2G,..., 256G)  G=gigabytes
 ----------trimFQ: Settings for Trimming FASTQ Files---------------------------------------------------------------
@@ -170,23 +176,24 @@ no		FixStacks (yes,no)   											Demultiplexing with stacks introduces anomol
 Run dDocentHPC to trim the reads as follows:
 
 ```bash
+# this could take a while and should probably be done on a powerful workstation (ex. >=16 threads, >=64 gb RAM)
+# if you run out of memory, reduce the number of Processors specified in config.4.all and rerun
 bash dDocentHPC/dDocentHPC.bash trimFQmap config.4.all
 ```
 
-This will create a dir called `mkBAM` that is populated with trimmed `fq.gz` files.
+This will create a dir called `mkBAM` if it does not exist and it is populated with the trimmed `*R[12].fq.gz` files.
 
 
 #### 2. Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
 
-Move to the mkBAM dir
 
 * obtain reference genome from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/)
   * reference genome should be a `fasta` formatted file and can be composed of 1, several, or all loci in the mtGenome
-  * name reference genome as follows: `reference.GenusSpecies.GenBankAccession.fasta` 
-* set cutoff in the `dDocentHPC` `config*` file to *_GenusSpecies_*
-* set cutoff2 i the `dDocentHPC` `config*` file to *_GenBankAccession_*
+  * as an example, you could name reference genome as follows: `reference.GenusSpecies.GenBankAccession.fasta` 
+* set cutoff in the `config.4.all` file to *_GenusSpecies_*
+* set cutoff2 im the `config.4.all` file to *_GenBankAccession_*
 
-Here is an example of the `dDocentHPC` config file:
+Here is an example of the relevant portion of `config.4.all`:
 
 ```bash
 ----------mkREF: Settings for de novo assembly of the reference genome--------------------------------------------
@@ -199,9 +206,15 @@ NC_023222               Cutoff2 (integer)                                       
 ------------------------------------------------------------------------------------------------------------------
 ```
 
+Move to the mkBAM dir, map the reads to the mtGenome, and filter the resulting BAM files
+
 ```bash
-bash dDocentHPC.bash mkBAM config.4.all
-bash dDocentHPC.bash fltrBAM config.4.all
+# note that the paths assume the directory structure specified above
+cd mkBAM
+
+# this could take a while and should probably be done on a powerful workstation (ex. 16 threads, 64 gb RAM)
+bash ../dDocentHPC/dDocentHPC.bash mkBAM ../config.4.all
+bash ../dDocentHPC/dDocentHPC.bash fltrBAM ../config.4.all
 ```
 
 This will create mildly filtered `RG.bam` files for each individual. These alignment maps are used in downstream processing.
