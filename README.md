@@ -549,14 +549,14 @@ This function will make consensus sequences for each sample category following t
 `cvgForCall` will determine the minimum read depth required to make a consensus base call. Base calling is performed by `consensusSeq.R` if you want to modify.
 
 ```bash
-PREFIX=concensusAlignment_
-LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
+PREFIX=paganAlign_
+LOCUS="PfalcMitoGenome"
 THREADS=32
-nontargetIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
-targetIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
-POPS=$(echo -e At"\t"Pk"\t"Kr"\t"St)
+nontargetIDs=$(cat Pproctozystron.txt)
+targetIDs=$(cat Pfalcifer.txt)
+POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
 cvgForCall=1
-bash radBARCODER.bash consensus $nontargetIDs $targetIDs $POPS $PREFIX $LOCUS $THREADS $cvgForCall
+bash radBARCODER.bash consensus "$nontargetIDs" "$targetIDs" $POPS $PREFIX $LOCUS $THREADS $cvgForCall
 ```
 
 Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
