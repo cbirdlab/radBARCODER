@@ -538,7 +538,7 @@ paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome_99.nex
 [`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.  [Precompiled, but outdated versions of PopArt](http://popart.otago.ac.nz/index.shtml)
 
 
-#### 7. If you didn't have much luck comparing individuals in steps 1-5, you can make meta mitochondrial genomes from groups of individuals and align those using `mkMETAGEN` and then goto step 6
+#### 7. If you didn't have much luck comparing individuals in steps 1-6, you can make meta mitochondrial genomes from groups of individuals and align those using `mkMETAGEN` and then goto step 6
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
