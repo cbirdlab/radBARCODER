@@ -556,7 +556,7 @@ nontargetIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
 targetIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
 POPS=$(echo -e At"\t"Pk"\t"Kr"\t"St)
 cvgForCall=1
-bash radBARCODER.bash consensus $nontargetIDs $targetIDs $THREADS $PREFIX $LOCUS $POPS $cvgForCall
+bash radBARCODER.bash consensus $nontargetIDs $targetIDs $POPS $PREFIX $LOCUS $THREADS $cvgForCall
 ```
 
 Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
