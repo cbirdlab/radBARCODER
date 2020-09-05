@@ -217,39 +217,99 @@ bash ../dDocentHPC/dDocentHPC.bash mkBAM ../config.4.all
 bash ../dDocentHPC/dDocentHPC.bash fltrBAM ../config.4.all
 ```
 
-This will create mildly filtered `RG.bam` files for each individual. These alignment maps are used in downstream processing.
+This will create mildly filtered `RG.bam` files for each individual. These alignment maps are used in downstream processing.  You should view the alignment maps with [IGV](https://software.broadinstitute.org/software/igv/download) or an equivalent bam viewer to ensure that mapping and filtering were successful.  Artifacts to look for are reads with too many SNPs (inappropriate alignment score threshold), large insertions at the beginning or ends of reads (adapter and barcode seqs not successfully trimmed), etc.  If your reads were not originally 150 bp, you will probably need to change the alignment settings in the `config.4.all` file and rerun mapping.
 
 
 #### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
 
-*Dependencies*: [`parallel`](https://www.gnu.org/software/parallel/) [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`samtools`](https://www.htslib.org/)
+*Dependencies*: [`parallel`](https://www.gnu.org/software/parallel/) [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`samtools`](https://www.htslib.org/)  [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, all are required by `ddocent`, so you should have these if you made it to this step)
 
-From here forward, you'll be running the `radBARCODER.bash` script in `bash`.  It is highly likely that they can be completed on your laptop, but you will need the required software. 
+From here forward, you'll be running the `radBARCODER.bash` scripts.  If you have not already, install required missing dependencies and clone the `radBARCODER` repo into your ProjectDir, and move the `radBARCODER` `*bash` and `*R` scripts to the mkBAM dir (see instructions above).
 
-You need to clone this repository to your computer:
+As a reminder, this is the expected dir structure after completing the previous step (some files and dirs created by trimming and mapping are omitted):
 
-```bash
-git clone https://github.com/cbirdlab/radBARCODER.git   #html
 ```
-
-Then you will need to copy all scripts in the repo ending in `bash` or `R` to your project directory:
-
-```bash
-#move into the repo you just cloned
-cd PathTOradBARCODERrepo
-cp *bash PathToProjectDir
-cp *R PathToProjectDir
+$ tree ../ProjectDir
+ProjectDir
+ ├──dDocentHPC
+ ├──config.4.all
+ ├──mkBAM
+ │   ├──consensusSeq.R
+ │   ├──cullSeqs.R
+ │   ├──maximizeBP.R
+ │   ├──pop1_ind1.R1.fq.gz
+ │   ├──pop1_ind1.R2.fq.gz
+ ...
+ │   ├──pop1_ind1.*.*.-RAW.bam
+ │   ├──pop1_ind1.*.*.-RAW.bam.bai
+ │   ├──pop1_ind1.*.*.-RG.bam
+ │   ├──pop1_ind1.*.*.-RG.bam.bai
+ ...
+ │   ├──radBARCODER.bash
+ │   ├──radBarcoder_functions.bash
+ │   └──reference.*.*.fasta
+ ├──pop1_ind1.F.fq.gz
+ ├──pop1_ind1.R.fq.gz
+ ...
+ └──radBARCODER
 ```
-
-*Dependencies*: [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, both are required by ddocent, so you could `module load ddocent` on your hpc)
 
 Update the following variable assignments and run `radBARCODER`:
 
 ```bash
-REF=reference.Hspil.NC_023222.fasta  #Name of reference genome
-bamPATTERN=.Hspil.NC_023222-RG.bam    #Pattern to id the bam files for each individual, this must be formatted as .CUTOFF1.CUTOFF2-RG.bam, where the CUTOFFs come from the dDocent config settings in step 2 above
-THREADS=8                            #number of processors to use for parallel operations
+#Name of reference mtGenome
+REF=reference.Pfalc.mtGenome.fasta  
+
+#Pattern to id the bam files for each individual, this must be formatted as follows .CUTOFF1.CUTOFF2-RG.bam, where the CUTOFFs come from the dDocent config settings in step 2 above and are used in the name of the reference mtGenome
+bamPATTERN=.Pfalc.mtGenome-RG.bam    
+
+#number of processors to use for parallel operations
+THREADS=8    
+
 bash radBARCODER.bash bam2fasta $REF $bamPATTERN $THREADS
+```
+
+Successful output looks like this:
+
+```
+#########################################################################
+Sat 05 Sep 2020 12:51:38 AM CDT RUNNING radBARCODER BAM2FASTA...
+#########################################################################
+
+Sat 05 Sep 2020 12:51:38 AM CDT VARIABLES READ IN:
+
+the function that will be run FUNKTION=......bam2fasta
+the reference genome used to map the reads REF=...........reference.Pfalc.mtGenome.fasta
+the ls pattern shared by all bam files bamPATTERN=.....Pfalc.mtGenome-RG.bam
+the number of cpu cores for the task THREADS=.......4
+the characters added to every file created PREFIX=........
+the name of the locus or loci LOCUS=.........
+the nucleotide positions in the reference genome to consider POSITIONS=.....
+the ls pattern shared by all mtGenomes that will be aligned mtGenPATTERN=..
+the aligner that will be used LONGALIGNMENT=.
+the GenBank sequences that should also be aligned GENBANK=.......
+
+
+Sat 05 Sep 2020 12:51:38 AM CDT 190 SAMPLES BEING PROCESSED:
+AtMk_Pfa052 AtMk_Pfa055 AtMk_Pfa077 AtMk_Pfa086 AtMk_Pfa089 AtMk_Pfa095 At_Pfa034 At_Pfa035 At_Pfa036 At_Pfa037 At_Pfa038 At_Pfa039 At_Pfa040 At_Pfa041 At_Pfa043 At_Pfa044 At_Pfa045 At_Pfa046 At_Pfa048 At_Pfa049 At_Pfa050 At_Pfa054 At_Pfa056 At_Pfa058 At_Pfa059 At_Pfa060 At_Pfa061 At_Pfa062 At_Pfa063 At_Pfa065 At_Pfa072 At_Pfa074 At_Pfa075 At_Pfa076 At_Pfa078 At_Pfa079 At_Pfa080 At_Pfa081 At_Pfa082 At_Pfa083 At_Pfa084 At_Pfa085 At_Pfa087 At_Pfa088 At_Pfa091 At_Pfa092 At_Pfa094 Kr_Pfa001 Kr_Pfa003 Kr_Pfa004 Kr_Pfa005 Kr_Pfa007 Kr_Pfa008 Kr_Pfa010 Kr_Pfa011 Kr_Pfa012 Kr_Pfa013 Kr_Pfa014 Kr_Pfa015 Kr_Pfa016 Kr_Pfa018 Kr_Pfa020 Kr_Pfa021 Kr_Pfa022 Kr_Pfa024 Kr_Pfa025 Kr_Pfa027 Kr_Pfa029 Kr_Pfa030 Kr_Pfa031 Kr_Pfa032 Kr_Pfa033 Kr_Pfa035 Kr_Pfa037 Kr_Pfa039 Kr_Pfa040 Kr_Pfa041 Kr_Pfa042 Kr_Pfa043 Kr_Pfa044 Kr_Pfa045 Kr_Pfa046 Kr_Pfa047 Kr_Ppr002 Kr_Ppr006 Kr_Ppr009 Kr_Ppr017 Kr_Ppr019 Kr_Ppr023 Kr_Ppr026 Kr_Ppr028 Kr_Ppr034 Kr_Ppr036 Kr_Ppr038 Pk_Pfa321 Pk_Pfa322 Pk_Pfa324 Pk_Pfa325 Pk_Pfa326 Pk_Pfa327 Pk_Pfa328 Pk_Pfa329 Pk_Pfa330 Pk_Pfa331 Pk_Pfa332 Pk_Pfa333 Pk_Pfa334 Pk_Pfa335 Pk_Pfa336 Pk_Pfa337 Pk_Pfa338 Pk_Pfa339 Pk_Pfa340 Pk_Pfa341 Pk_Pfa343 Pk_Pfa346 Pk_Pfa347 Pk_Pfa348 Pk_Pfa349 Pk_Pfa351 Pk_Pfa352 Pk_Pfa353 Pk_Pfa356 Pk_Pfa357 Pk_Pfa358 Pk_Pfa359 Pk_Pfa360 Pk_Pfa361 Pk_Pfa362 Pk_Pfa363 Pk_Pfa364 Pk_Pfa365 Pk_Pfa366 Pk_Pfa367 Pk_Pfa370 Pk_Pfa371 Pk_Pfa372 Pk_Pfa373 Pk_Pfa375 Pk_Pfa376 Pk_Pfa377 Pk_Pfa380 St_Pfa001 St_Pfa002 St_Pfa003 St_Pfa004 St_Pfa005 St_Pfa006 St_Pfa007 St_Pfa008 St_Pfa009 St_Pfa010 St_Pfa011 St_Pfa012 St_Pfa013 St_Pfa014 St_Pfa015 St_Pfa016 St_Pfa018 St_Pfa019 St_Pfa021 St_Pfa022 St_Pfa023 St_Pfa024 St_Pfa025 St_Pfa026 St_Pfa027 St_Pfa028 St_Pfa029 St_Pfa030 St_Pfa031 St_Pfa032 St_Pfa033 St_Pfa034 St_Pfa035 St_Pfa036 St_Pfa037 St_Pfa040 St_Pfa041 St_Pfa042 St_Pfa043 St_Pfa044 St_Pfa045 St_Pfa046 St_Pfa047 St_Pfa048 St_Pfa049 St_Pfa050 St_Pfa051 St_Ppr017
+
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 30000
+Lines   total/split/realigned/skipped:  904/0/0/0
+Applied 37 variants
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 30000
+Lines   total/split/realigned/skipped:  734/0/0/0
+Applied 51 variants
+...
+[mpileup] 1 samples in 1 input files
+[mpileup] maximum number of reads per input file set to -d 30000
+Lines   total/split/realigned/skipped:  1087/0/0/0
+Applied 31 variants
+
+#########################################################################
+Sat 05 Sep 2020 12:51:46 AM CDT radBARCODER BAM2FASTA COMPLETED
+#########################################################################
 ```
 
 This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual. Note that heterozygous positions are set to default to the reference allele. This behavior can be modified in `radBarcodder_functions.bash` at the line beginning with `bcftools consensus`. 
@@ -267,19 +327,23 @@ Hard coded strigencies are:
 
 *Dependencies*: [`pagan`](http://wasabiapp.org/software/pagan/) [`mafft`](https://mafft.cbrc.jp/alignment/software/) [`seaview`](http://doua.prabi.fr/software/seaview) 
 
+If you have additional sequences from GenBank that you would like to include with this alignment, you should download them and save into your 'mkBAM' dir. Additional mtGenome sequences should be saves as FASTA files and renamed to have a common format of your choosing. A FASTA file for targeted locus sequences can also be downloaded and included in the alignment.  See the specification of user-defined variables `mtGenPATTERN` and `GENBANKFASTA` below. 
+
 Note that seaview is only used to convert from `fasta` to `nexus` format, so if you don't have it installed, you can manually convert the `fasta` to `nexus`. Also, while the pagan precompiled tar.gz does have mafft, it is not complete and you should use the complete mafft if you are aligning very long sequences, otherwise you will get an error when setting `LONGALIGNMENT=TRUE`
 
-You can specify which positions to target to make alignments, including disjunct positions. For example, if you want to specify positions 1-10, then:
+You can specify which positions to target (for specific loci and genes) to make alignments, including disjunct positions. For example, if you want to specify positions 1-10, then:
 
 ```bash
 POSITIONS=1-10
 ```
 
-If you want positions 1-4 and 6-10, then:
+If you want to align only positions 1-4 and 6-10, then:
 
 ```bash
 POSITIONS=1-4,6-10
 ```
+
+Refer to the mtGenomes annotation for the positions of particular loci of interest.
 
 The other issue is which aligner to use.  I've tried `clustalw`, `clustalo`, `mafft`, and `pagan2`.  I've found `pagan2` to be superior in that it almost never needs to be aligned by eye to clean up mistakes.  The default behavior is to run `pagan2` for alignment.  However, if you run into problems, potentially due to sequences being very long, then you can try `mafft` with options set for very long sequences as follows:
 
@@ -290,26 +354,92 @@ LONGALIGNMENT=TRUE
 Update the following variable assignments and run `radBARCODER`:
 
 ```bash
-#REF=reference.Hspil.NC_023222.fasta  #Name of reference genome
-#CUTOFFS=".Hspil.NC_023222"  #dDocent cutoffs used for reference genome
-#PREFIX=Test  #prefix on files created
-#THREADS=8  # number of cores to use
-#mtGenPATTERN="*mtGenome.fasta"  #pattern match for fasta files with mito genomes to include in alignment
-#GENBANKFASTA=""  #name of fasta file with additional sequences from genbank to include in alignment
+REF=reference.Pfalc.mtGenome.fasta
+bamPATTERN=.Pfalc.mtGenome-RG.bam
+THREADS=4
 
-REF=reference.Hspil.NC_023222.fasta  #Name of reference genome
-bamPATTERN=.Hspil.NC_023222.bam
-POSITIONS=40-200,5665-5970,10000-10500
-LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
-PREFIX=Test_
-THREADS=8
-mtGenPATTERN="*mtGenome.fasta"
+# positions from the reference mtGenome and BAM files to include in the alignment
+POSITIONS=1-18000
+
+# the name of the locus or loci specified in POSITIONS
+LOCUS="PfalcMitoGenome"
+
+#prefix on output files 
+PREFIX=paganAlign_
+
+# a pattern using wildcards that matches all mtGenome files other than the reference mtGenome
+mtGenPATTERN="A*Genome.fasta"
+
+# the name of a fasta file that has sequences to include in the alignment
 GENBANKFASTA=""
+
+# specify whether pagan (FALSE) or mafft (TRUE) is used to align.  pagan is better
+LONGALIGNMENT=FALSE
 
 bash radBARCODER.bash align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
-It is important to check the alignment and edit as necessary. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. 
+Successful output looks like this:
+
+```
+#########################################################################
+Sat 05 Sep 2020 01:09:40 AM CDT RUNNING radBARCODER ALIGN...
+#########################################################################
+
+Sat 05 Sep 2020 01:09:40 AM CDT VARIABLES READ IN:
+
+the function that will be run FUNKTION=......align
+the reference genome used to map the reads REF=...........reference.Pfalc.mtGenome.fasta
+the ls pattern shared by all bam files bamPATTERN=.....Pfalc.mtGenome-RG.bam
+the number of cpu cores for the task THREADS=.......4
+the characters added to every file created PREFIX=........paganAlign_
+the name of the locus or loci LOCUS=.........PfalcMitoGenome
+the nucleotide positions in the reference genome to consider POSITIONS=.....1-18000
+the ls pattern shared by all mtGenomes that will be aligned mtGenPATTERN=..A*Genome.fasta
+the aligner that will be used LONGALIGNMENT=.FALSE
+the GenBank sequences that should also be aligned GENBANK=.......
+
+
+Sat 05 Sep 2020 01:09:40 AM CDT 190 SAMPLES BEING PROCESSED:
+AtMk_Pfa052 AtMk_Pfa055 AtMk_Pfa077 AtMk_Pfa086 AtMk_Pfa089 AtMk_Pfa095 At_Pfa034 At_Pfa035 At_Pfa036 At_Pfa037 At_Pfa038 At_Pfa039 At_Pfa040 At_Pfa041 At_Pfa043 At_Pfa044 At_Pfa045 At_Pfa046 At_Pfa048 At_Pfa049 At_Pfa050 At_Pfa054 At_Pfa056 At_Pfa058 At_Pfa059 At_Pfa060 At_Pfa061 At_Pfa062 At_Pfa063 At_Pfa065 At_Pfa072 At_Pfa074 At_Pfa075 At_Pfa076 At_Pfa078 At_Pfa079 At_Pfa080 At_Pfa081 At_Pfa082 At_Pfa083 At_Pfa084 At_Pfa085 At_Pfa087 At_Pfa088 At_Pfa091 At_Pfa092 At_Pfa094 Kr_Pfa001 Kr_Pfa003 Kr_Pfa004 Kr_Pfa005 Kr_Pfa007 Kr_Pfa008 Kr_Pfa010 Kr_Pfa011 Kr_Pfa012 Kr_Pfa013 Kr_Pfa014 Kr_Pfa015 Kr_Pfa016 Kr_Pfa018 Kr_Pfa020 Kr_Pfa021 Kr_Pfa022 Kr_Pfa024 Kr_Pfa025 Kr_Pfa027 Kr_Pfa029 Kr_Pfa030 Kr_Pfa031 Kr_Pfa032 Kr_Pfa033 Kr_Pfa035 Kr_Pfa037 Kr_Pfa039 Kr_Pfa040 Kr_Pfa041 Kr_Pfa042 Kr_Pfa043 Kr_Pfa044 Kr_Pfa045 Kr_Pfa046 Kr_Pfa047 Kr_Ppr002 Kr_Ppr006 Kr_Ppr009 Kr_Ppr017 Kr_Ppr019 Kr_Ppr023 Kr_Ppr026 Kr_Ppr028 Kr_Ppr034 Kr_Ppr036 Kr_Ppr038 Pk_Pfa321 Pk_Pfa322 Pk_Pfa324 Pk_Pfa325 Pk_Pfa326 Pk_Pfa327 Pk_Pfa328 Pk_Pfa329 Pk_Pfa330 Pk_Pfa331 Pk_Pfa332 Pk_Pfa333 Pk_Pfa334 Pk_Pfa335 Pk_Pfa336 Pk_Pfa337 Pk_Pfa338 Pk_Pfa339 Pk_Pfa340 Pk_Pfa341 Pk_Pfa343 Pk_Pfa346 Pk_Pfa347 Pk_Pfa348 Pk_Pfa349 Pk_Pfa351 Pk_Pfa352 Pk_Pfa353 Pk_Pfa356 Pk_Pfa357 Pk_Pfa358 Pk_Pfa359 Pk_Pfa360 Pk_Pfa361 Pk_Pfa362 Pk_Pfa363 Pk_Pfa364 Pk_Pfa365 Pk_Pfa366 Pk_Pfa367 Pk_Pfa370 Pk_Pfa371 Pk_Pfa372 Pk_Pfa373 Pk_Pfa375 Pk_Pfa376 Pk_Pfa377 Pk_Pfa380 St_Pfa001 St_Pfa002 St_Pfa003 St_Pfa004 St_Pfa005 St_Pfa006 St_Pfa007 St_Pfa008 St_Pfa009 St_Pfa010 St_Pfa011 St_Pfa012 St_Pfa013 St_Pfa014 St_Pfa015 St_Pfa016 St_Pfa018 St_Pfa019 St_Pfa021 St_Pfa022 St_Pfa023 St_Pfa024 St_Pfa025 St_Pfa026 St_Pfa027 St_Pfa028 St_Pfa029 St_Pfa030 St_Pfa031 St_Pfa032 St_Pfa033 St_Pfa034 St_Pfa035 St_Pfa036 St_Pfa037 St_Pfa040 St_Pfa041 St_Pfa042 St_Pfa043 St_Pfa044 St_Pfa045 St_Pfa046 St_Pfa047 St_Pfa048 St_Pfa049 St_Pfa050 St_Pfa051 St_Ppr017
+
+
+Sat 05 Sep 2020 01:09:40 AM CDT EXTRACTING POSITIONS 1-18000 FOR ALIGNMENT...
+
+Sat 05 Sep 2020 01:09:40 AM CDT REMOVING INDIVIDUALS WITH NO NUCLEOTIDES CALLED...
+
+Sat 05 Sep 2020 01:09:40 AM CDT GATHERING ALL mtGENOMEs WITH PATTERN=A*Genome.fasta AND EXTRACTING POSITIONS 1-18000
+
+Sat 05 Sep 2020 01:09:41 AM CDT ADDING reference.Pfalc.mtGenome.fasta SEQUENCES FROM GENBANK...
+
+Sat 05 Sep 2020 01:09:41 AM CDT CONCATENATING FASTAs...
+
+Sat 05 Sep 2020 01:09:41 AM CDT ALIGNING SEQUENCES WITH pagan2...
+
+Sat 05 Sep 2020 01:09:41 AM CDT ALIGNING RAD DATA TO MITOGENOMES...
+
+PAGAN2 v.1.53 (29 August, 2019). (C) 2010-2019 by Ari Löytynoja <ari.loytynoja@gmail.com>.
+ This program is provided "as-is", with NO WARRANTY whatsoever; this is a development version
+ and may contain bugs.
+
+The analysis started: Sat Sep  5 01:09:41 2020
+Alignment file: ref.fas
+Guidetree file: ref.tre
+
+The analysis finished: Sat Sep  5 01:09:42 2020
+Total time used by PAGAN: 0.796133 wall sec, 0.459117 cpu sec.
+
+
+Sat 05 Sep 2020 01:09:52 AM CDT Making sure all individuals have same number of nucleotides plus indels
+     There are 16593 nucleotides in the longest sequence
+     953 indels being added to short sequence
+
+#########################################################################
+Sat 05 Sep 2020 01:10:49 AM CDT radBARCODER ALIGN COMPLETED
+#########################################################################
+```
+
+It is important to check the alignment by eye and edit as necessary or adjust upstream settings. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. In the example data set, which has a lot of missing data, I did not have adjust the alignment at all, but mileage may vary.
 
 #### 5. Make network with `PopArt` 
 
