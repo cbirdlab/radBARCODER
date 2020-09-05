@@ -32,6 +32,8 @@ echo "#########################################################################"
 echo `date` RUNNING radBARCODER $(echo $FUNKTION | tr [a-z] [A-Z])...
 echo "#########################################################################"
 
+reportVARS(){
+
 echo ""; echo `date` VARIABLES READ IN:
 echo ""
 echo the function that will be run                                FUNKTION=......$FUNKTION
@@ -45,6 +47,8 @@ echo the ls pattern shared by all mtGenomes that will be aligned  mtGenPATTERN=.
 echo the aligner that will be used                                LONGALIGNMENT=.$LONGALIGNMENT 
 echo the GenBank sequences that should also be aligned            GENBANK=.......$GENBANK
 echo ""
+
+}
 
 #set other variables
 #REF=reference${CUTOFFS}.fasta
@@ -72,7 +76,8 @@ elif [ "$FUNKTION" == "consensus" ]; then
 		PREFIX=$5
 		LOCUS=$6
 		THREADS=$7
-		cvgForCall=$8		
+		cvgForCall=$8	
+		reportVARS
 		mkConsensusFasta nontargetIDs targetIDs POPS $PREFIX $LOCUS $THREADS $cvgForCall
 elif [ "$FUNKTION" == "maximizeBP" ]; then
 	#maximize the number of bp retained at the expense of retaining individuals
