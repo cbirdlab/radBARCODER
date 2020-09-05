@@ -6,9 +6,9 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 ## Quick Start
 
-#### 0. Prepare your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files and a reference mitchondrial genome
+#### 0. Prepare your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files and a reference mitchondrial genome & install software
 
-Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for RAD data.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
+Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for processing RAD data in unix-based computers.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
 
 ```
 # files must end with [FR].fq.gz
@@ -23,6 +23,17 @@ It is also assumed that you have a fully assembled mitochondrial genome saved as
 ```
 # no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters.
 reference.*.*.fasta
+```
+
+Goto [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. There is a script that automatically installs the software on your unix-based system. dDocentHPC was forked from [dDocent](https://www.ddocent.com) and shares many similarities but the instructions here assume you are using dDocentHPC. You can run dDocentHPC on a workstation or HPC. Lastly, it is up to you whether you put the `dDocentHPC.bash` script into your `$PATH` or run it directly from the repo.  I usually clone a fresh copy to the top level of a project directory and call it directly using a command like:
+
+```
+# assumed directory structure:
+ProjectDir
+ ├──dDocentHPC
+ ├──pop1_ind1.F.fq.gz
+ ├──pop1_ind1.R.fq.gz
+
 ```
 
 #### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
