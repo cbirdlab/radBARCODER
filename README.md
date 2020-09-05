@@ -130,19 +130,19 @@ Before running `dDocentHPC`, you should adjust the settings in the config file `
 32              Number of Processors (Auto, 1, 2, 3, ..., n threads) cbirdq=40 normal=20
 120G    Maximum Memory (1G,2G,..., 256G)  G=gigabytes
 ----------trimFQ: Settings for Trimming FASTQ Files---------------------------------------------------------------
-146		trimmomatic MINLEN (integer, mkREF only)						              Drop the read if it is below a specified length. Set to the length of the Read1 reads.
-75		trimmomatic MINLEN (integer, mkBAM only)						               Drop the read if it is below a specified length. Set to the minimum frag length you want mapped to the reference.
-20		trimmomatic LEADING:<quality> (integer, mkBAM only)			     	 Specifies the minimum quality required to keep a base.
-15		trimmomatic TRAILING:<quality> (integer, mkREF only)		     	 Specifies the minimum quality required to keep a base.
-20		trimmomatic TRAILING:<quality> (integer, mkBAM only)			      Specifies the minimum quality required to keep a base.
-2		trimmomatic ILLUMINACLIP:<seed mismatches> (integer)			       specifies the maximum mismatch count which will still allow a full match to be performed
+146		trimmomatic MINLEN (integer, mkREF only)						Drop the read if it is below a specified length. Set to the length of the Read1 reads.
+75		trimmomatic MINLEN (integer, mkBAM only)						Drop the read if it is below a specified length. Set to the minimum frag length you want mapped to the reference.
+20		trimmomatic LEADING:<quality> (integer, mkBAM only)				Specifies the minimum quality required to keep a base.
+15		trimmomatic TRAILING:<quality> (integer, mkREF only)			Specifies the minimum quality required to keep a base.
+20		trimmomatic TRAILING:<quality> (integer, mkBAM only)			Specifies the minimum quality required to keep a base.
+2		trimmomatic ILLUMINACLIP:<seed mismatches> (integer)			specifies the maximum mismatch count which will still allow a full match to be performed
 30		trimmomatic ILLUMINACLIP:<palindrome clip thresh> (integer)		specifies how accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment
-10		trimmomatic ILLUMINACLIP:<simple clip thresh> (integer)		   	specifies how accurate the match between any adapter etc. sequence must be against a read.
-20		trimmomatic SLIDINGWINDOW:<windowSize> (integer)				         specifies the number of bases to average across
-20		trimmomatic SLIDINGWINDOW:<windowQuality> (integer)				      specifies the average quality required.
-0   trimmomatic CROP:<bp to keep> (integer, mkBAM only)          Trim read sequences down to this length. Enter 0 for no cropping
+10		trimmomatic ILLUMINACLIP:<simple clip thresh> (integer)			specifies how accurate the match between any adapter etc. sequence must be against a read.
+20		trimmomatic SLIDINGWINDOW:<windowSize> (integer)				specifies the number of bases to average across
+20		trimmomatic SLIDINGWINDOW:<windowQuality> (integer)				specifies the average quality required.
+0   trimmomatic CROP:<bp to keep> (integer, mkBAM only)    Trim read sequences down to this length. Enter 0 for no cropping
 0		trimmomatic HEADCROP:<length> (integer, only Read1 for ezRAD)	The number of bases to remove from the start of the read. 0 for ddRAD, 5 for ezRAD
-no		FixStacks (yes,no)   										                             	Demultiplexing with stacks introduces anomolies.  This removes them.  
+no		FixStacks (yes,no)   											Demultiplexing with stacks introduces anomolies.  This removes them.  
 ------------------------------------------------------------------------------------------------------------------
 ```
 
