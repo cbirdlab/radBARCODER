@@ -46,11 +46,11 @@ ProjectDir
  ├──dDocentHPC
  ├──config.4.all
  ├──mkBAM
-    ├──consensusSeq.R
-    ├──cullSeqs.R
-    ├──maximizeBP.R
-    ├──radBARCODER.bash
-    └──radBarcoder_functions.bash
+ │   ├──consensusSeq.R
+ │   ├──cullSeqs.R
+ │   ├──maximizeBP.R
+ │   ├──radBARCODER.bash
+ │   └──radBarcoder_functions.bash
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
  ...
@@ -59,11 +59,12 @@ ProjectDir
 
 Goto [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. There is a script that automatically installs the software on your unix-based system. dDocentHPC was forked from [dDocent](https://www.ddocent.com) and shares many similarities but the instructions here assume you are using dDocentHPC. You can run dDocentHPC on a workstation or HPC. It is up to you whether you put the `dDocentHPC.bash` script into your `$PATH` or run it directly from the repo.  I usually clone a fresh copy to the top level of a project directory and execute it directly with `bash`.
 
-If processing ddRAD libraries using published protocols such as Peterson et al. (2012), I recommend adding 2 sequences to the `trimmomatic` adapters file.
+If processing ddRAD libraries that are based on Peterson et al. (2012), I recommend adding 2 adapter sequences to the `trimmomatic` adapters file by overwriting the file `TruSeq3-PE-2.fa` which comes with `trimmomatic` with the modified `TruSeq3-PE-2.fa` file in the `radBARCODER` dir. You may also modify the `TruSeq3-PE-2.fa` file as necessary for your flavor of library prep.
 
 ```
 # this will work on a workstation. on an HPC, run `dDocentHPC trimFQ` (see below) and view the output to see the path to the adapters file
-
+cd ProjectDir
+sudo cp radBARCODER/TruSeq3-PE-2.fa /usr/local/bin/adapters
 ```
 
 `radBARCODER` has a few additional dependencies. Unfortunately, there is no installation script for them but it is not difficult.  I provide some commands below which should work but it is up to you to find and update the URLs to the latest versions and make sure that the unzipped tarball dir names match the provided code.
