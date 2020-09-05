@@ -76,9 +76,11 @@ elif [ "$FUNKTION" == "consensus" ]; then
 		PREFIX=$5
 		LOCUS=$6
 		THREADS=$7
-		cvgForCall=$8	
+		cvgForCall=$8
+		nontargetNAME=$9
+		targetNAME=${10}
 		reportVARS
-		mkConsensusFasta nontargetIDs targetIDs POPS $PREFIX $LOCUS $THREADS $cvgForCall
+		mkConsensusFasta nontargetIDs targetIDs POPS $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 elif [ "$FUNKTION" == "maximizeBP" ]; then
 	#maximize the number of bp retained at the expense of retaining individuals
 		FASTA=$2
