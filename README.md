@@ -37,18 +37,24 @@ git clone https://github.com/cbirdlab/dDocentHPC.git
  
 # set up dir
 cp dDocentHPC/config.4.all .
-cp radBARCODER/*bash .
-cp radBARCODER/*R .
+mkdir mkBAM
+cp radBARCODER/*bash mkBAM
+cp radBARCODER/*R mkBAM
 
 # assumed directory structure:
 ProjectDir
  ├──dDocentHPC
+ ├──config.4.all
+ ├──mkBAM
+    ├──consensusSeq.R
+    ├──cullSeqs.R
+    ├──maximizeBP.R
+    ├──radBARCODER.bash
+    └──radBarcoder_functions.bash
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
- 
+ ...
  └──radBARCODER
-
-
 ```
 
 Goto [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. There is a script that automatically installs the software on your unix-based system. dDocentHPC was forked from [dDocent](https://www.ddocent.com) and shares many similarities but the instructions here assume you are using dDocentHPC. You can run dDocentHPC on a workstation or HPC. It is up to you whether you put the `dDocentHPC.bash` script into your `$PATH` or run it directly from the repo.  I usually clone a fresh copy to the top level of a project directory and execute it directly with `bash`.
