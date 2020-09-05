@@ -123,12 +123,12 @@ install.packages(c("seqinr", "stringr"))
 
 #### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
-We will assume th
+Before running `dDocentHPC`, you should adjust the settings in the config file `config.4.all`
 
 `config*` file settings:
 ```bash
 32              Number of Processors (Auto, 1, 2, 3, ..., n threads) cbirdq=40 normal=20
-230G    Maximum Memory (1G,2G,..., 256G)  G=gigabytes
+120G    Maximum Memory (1G,2G,..., 256G)  G=gigabytes
 ----------trimFQ: Settings for Trimming FASTQ Files---------------------------------------------------------------
 146             trimmomatic MINLEN (integer, mkREF only)                                                Drop the read if it is below a specified l$
 75              trimmomatic MINLEN (integer, mkBAM only)                                                Drop the read if it is below a specified l$
