@@ -42,6 +42,7 @@ cp radBARCODER/*bash mkBAM
 cp radBARCODER/*R mkBAM
 
 # assumed directory structure:
+$ tree ../ProjectDir
 ProjectDir
  ├──dDocentHPC
  ├──config.4.all
