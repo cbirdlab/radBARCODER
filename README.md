@@ -25,18 +25,79 @@ It is also assumed that you have a fully assembled mitochondrial genome saved as
 reference.*.*.fasta
 ```
 
-Goto [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. There is a script that automatically installs the software on your unix-based system. dDocentHPC was forked from [dDocent](https://www.ddocent.com) and shares many similarities but the instructions here assume you are using dDocentHPC. You can run dDocentHPC on a workstation or HPC. Lastly, it is up to you whether you put the `dDocentHPC.bash` script into your `$PATH` or run it directly from the repo.  I usually clone a fresh copy to the top level of a project directory and call it directly using a command like:
+It is up to you how to handle the radBARCODER and dDocentHPC scripts, but here I assume that you will clone fresh copies of the two repos into your project directory and run the scripts directly rather than putting them into your `$PATH`.  Clone the radBARCODER and dDocentHPC repos to your project dir:
 
-```
+```bash
+# move to your directory for this project. replace "ProjectDir" with the path to the directory for this project
+cd ProjectDir  
+
+# clone repos to your project dir as follows
+git clone https://github.com/cbirdlab/radBARCODER.git   
+git clone https://github.com/cbirdlab/dDocentHPC.git
+
 # assumed directory structure:
 ProjectDir
  ├──dDocentHPC
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
-
+ 
+ └──radBARCODER
 ```
 
+Goto [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. There is a script that automatically installs the software on your unix-based system. dDocentHPC was forked from [dDocent](https://www.ddocent.com) and shares many similarities but the instructions here assume you are using dDocentHPC. You can run dDocentHPC on a workstation or HPC. It is up to you whether you put the `dDocentHPC.bash` script into your `$PATH` or run it directly from the repo.  I usually clone a fresh copy to the top level of a project directory and execute it directly with `bash`.
+
+`radBARCODER` has a few additional dependencies. Unfortunately, there is no installation script for them but it is not difficult.  I provide some commands below which should work but it is up to you to find and update the URLs to the latest versions and make sure that the unzipped tarball dir names match the provided code.
+
+* [`pagan2`](http://wasabiapp.org/software/pagan/) 
+
+* [`mafft`](https://mafft.cbrc.jp/alignment/software/) 
+
+* [`seaview`](http://doua.prabi.fr/software/seaview) 
+
+* [`R`](https://www.r-project.org/)
+
+```
+# goto your downloads directory and update your apps (assuming Ubuntu or Debian OS)
+cd ~/Downloads
+sudo apt update
+sudo apt upgrade
+
+# install seaview (assuming Ubuntu or Debian OS)
+wget http://doua.prabi.fr/software/seaview_data/seaview5-64.tgz
+tar -xzf seaview5-64.tgz
+# this could overwrite newer installations of clustalo, muscle. an alternative to this command is to add the pagan dir to the `$PATH`
+sudo cp seaview/* /usr/local/bin
+
+# install pagan2 (assuming Ubuntu or Debian OS)
+wget http://wasabiapp.org/download/pagan/pagan2.linux64.20190829.tgz
+tar -xzf pagan2.linux64.20190829.tgz
+# this could overwrite newer installations of mafft, raxml. an alternative to this command is to add the pagan dir to the `$PATH`
+sudo cp pagan/bin/* /usr/local/bin
+
+# install mafft (assuming Ubuntu or Debian OS)
+# note that pagan2 includes an old version of mafft and doing this could overwrite it.  I have not had any problems yet, but an alternative would be to add the pagan dir to the `$PATH`
+wget https://mafft.cbrc.jp/alignment/software/mafft_7.471-1_amd64.deb
+sudo dpkg -i mafft_7.471-1_amd64.deb
+
+# See if you have R (ctrl-d to exit)
+R
+
+# if you do not have R, install R (assuming Ubuntu or Debian OS)
+sudo apt -y install r-base
+
+# alternatively, you could install the latest version of R from the GUI or following these CLI instructions https://cran.revolutionanalytics.com/doc/manuals/r-release/R-admin.html#Installing-R-under-Unix_002dalikes
+
+# run R and install required packages
+R
+install.packages(c("seqinr", "stringr"))
+```
+
+Additionally, `radBARCODER` uses R.  
+
+
 #### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
+
+We will assume th
 
 `config*` file settings:
 ```bash
@@ -119,7 +180,7 @@ cp *bash PathToProjectDir
 cp *R PathToProjectDir
 ```
 
-*Dependencies*: [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, both are required by ddocent, so you could module load ddocent on your hpc)
+*Dependencies*: [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, both are required by ddocent, so you could `module load ddocent` on your hpc)
 
 Update the following variable assignments and run `radBARCODER`:
 
@@ -195,6 +256,8 @@ It is important to check the alignment and edit as necessary. I recommend [`seav
 
 
 #### 6. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 5
+
+*Dependencies*: `R` (`seqinr`, `stringr`) 
 
 Not vetted for mass consumption yet
 
