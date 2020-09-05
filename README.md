@@ -123,7 +123,28 @@ install.packages(c("seqinr", "stringr"))
 
 #### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
-Before running `dDocentHPC`, you should adjust the settings in the config file `config.4.all`
+Before running `dDocentHPC`, you should adjust the settings in the config file `config.4.all` as necessary.  `trimmomatic` is used to complete trimming which will remove low quality base calls, adapters, and reads that are too short after the removal of nucleotides.  The settings that affect reads trimmed for mapping to the mtGenome are labeled in the config as `mkBAM` signifying that these reads will be used to make the BAM files.
+
+```
+# assumed directory structure, replace "ProjectDir" with the name of your project directory
+ProjectDir
+ ├──dDocentHPC
+ ├──config.4.all
+ ├──mkBAM
+ │   ├──consensusSeq.R
+ │   ├──cullSeqs.R
+ │   ├──maximizeBP.R
+ │   ├──radBARCODER.bash
+ │   └──radBarcoder_functions.bash
+ ├──pop1_ind1.F.fq.gz
+ ├──pop1_ind1.R.fq.gz
+ ...
+ └──radBARCODER
+```
+
+```bash
+nano config.4.all
+```
 
 `config*` file settings:
 ```bash
@@ -149,7 +170,7 @@ no		FixStacks (yes,no)   											Demultiplexing with stacks introduces anomol
 Run dDocentHPC to trim the reads as follows:
 
 ```bash
-bash dDocentHPC.bash trimFQmap config.4.all
+bash dDocentHPC/dDocentHPC.bash trimFQmap config.4.all
 ```
 
 This will create a dir called `mkBAM` that is populated with trimmed `fq.gz` files.
