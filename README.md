@@ -1,5 +1,5 @@
 # radBARCODER
-scripts to extract, align, and type mtDNA data from restriction site associated DNA
+scripts to extract, align, and type mtDNA data from restriction site associated DNA with mitochondrial reference genomes of non-model species
 
 ---
 
