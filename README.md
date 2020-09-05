@@ -441,36 +441,7 @@ Sat 05 Sep 2020 01:10:49 AM CDT radBARCODER ALIGN COMPLETED
 
 It is important to check the alignment by eye and edit as necessary or adjust upstream settings. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. In the example data set, which has a lot of missing data, I did not have adjust the alignment at all, but mileage may vary.
 
-#### 5. Make network with `PopArt` 
-
-[`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.  [Precompiled, but outdated versions of PopArt](http://popart.otago.ac.nz/index.shtml)
-
-
-#### 6. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 5
-
-*Dependencies*: `R` (`seqinr`, `stringr`) 
-
-Not vetted for mass consumption yet
-
-This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file.
-`
-`cvgForCall` will determine the minimum read depth required to make a consensus base call. Base calling is performed by `consensusSeq.R` if you want to modify.
-
-```bash
-PREFIX=concensusAlignment_
-LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
-THREADS=32
-nontargetIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
-targetIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
-POPS=$(echo -e At"\t"Pk"\t"Kr"\t"St)
-cvgForCall=1
-bash radBARCODER.bash consensus $nontargetIDs $targetIDs $THREADS $PREFIX $LOCUS $POPS $cvgForCall
-```
-
-Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
-
-
-#### 7. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 6, either retaining more loci or more individuals, then goto step 5.
+#### 5. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 7, either retaining more loci or more individuals, then goto step 6.
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
@@ -481,7 +452,7 @@ Set the `PCT` varable between 1 and 99, where it is the amount of allowable miss
 Update the following variable assignments and run `radBARCODER`:
 
 ```bash
-FASTA="Test_ALL_masked_aligned_clean_tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4.fasta"
+FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 PCT=99
 bash radBARCODER.bash maximizeBP $FASTA $PCT
 PCT=95
@@ -515,6 +486,73 @@ bash radBARCODER.bash maximizeBP $FASTA $PCT
 
 ```
 
-Despite the messages, if the files are created, then this worked as intended.
+Example successful output from 1 run looks like this (while some errors show up here, bute these are ok because they are not related to the `maximizeBP` function or are normal output that I have not suppressed (yet):
+
+```
+#########################################################################
+Sat 05 Sep 2020 01:19:12 AM CDT RUNNING radBARCODER MAXIMIZEBP...
+#########################################################################
+
+Sat 05 Sep 2020 01:19:12 AM CDT VARIABLES READ IN:
+
+the function that will be run FUNKTION=......maximizeBP
+the reference genome used to map the reads REF=...........paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
+the ls pattern shared by all bam files bamPATTERN=....99
+the number of cpu cores for the task THREADS=.......
+the characters added to every file created PREFIX=........
+the name of the locus or loci LOCUS=.........
+the nucleotide positions in the reference genome to consider POSITIONS=.....
+the ls pattern shared by all mtGenomes that will be aligned mtGenPATTERN=..
+the aligner that will be used LONGALIGNMENT=.
+the GenBank sequences that should also be aligned GENBANK=.......
+
+ls: cannot access '*99': No such file or directory
+
+Sat 05 Sep 2020 01:19:12 AM CDT 1 SAMPLES BEING PROCESSED:
+
+
+
+Sat 05 Sep 2020 01:19:12 AM CDT Be sure to check the fasta alignment by eye as small errors do occur
+[1] "paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome"
+[2] "99"
+null device
+          1
+
+#########################################################################
+Sat 05 Sep 2020 01:19:13 AM CDT radBARCODER MAXIMIZEBP COMPLETED
+#########################################################################
+```
+
+
+#### 6. Make network with `PopArt` 
+
+[`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.  [Precompiled, but outdated versions of PopArt](http://popart.otago.ac.nz/index.shtml)
+
+
+#### 7. If you didn't have much luck comparing individuals in steps 1-5, you can make consensus sequences from groups of individuals and align those using `consensus` and then goto step 6
+
+*Dependencies*: `R` (`seqinr`, `stringr`) 
+
+Not vetted for mass consumption yet
+
+This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file.
+`
+`cvgForCall` will determine the minimum read depth required to make a consensus base call. Base calling is performed by `consensusSeq.R` if you want to modify.
+
+```bash
+PREFIX=concensusAlignment_
+LOCUS="tRNA-Phe-12S-COI-tRNA-Arg-ND4L-ND4"
+THREADS=32
+nontargetIDs=$(cat RAD_OUTLIER_Pfalcifer_fish.txt)
+targetIDs=$(cat RAD_NORMAL_Pfalcifer_fish.txt)
+POPS=$(echo -e At"\t"Pk"\t"Kr"\t"St)
+cvgForCall=1
+bash radBARCODER.bash consensus $nontargetIDs $targetIDs $THREADS $PREFIX $LOCUS $POPS $cvgForCall
+```
+
+Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
+
+
+
 
 
