@@ -1,11 +1,29 @@
 # radBARCODER
-scripts to extract, align, and type mtDNA data from restriction site associated DNA with mitochondrial reference genomes of non-model species
+
+scripts to extract, align, and type mtDNA data from restriction site associated DNA sequenced on an [Illumina Machine](https://en.wikipedia.org/wiki/Illumina,_Inc.) with mitochondrial reference genomes of non-model species
 
 ---
 
 ## Quick Start
 
-Follow these steps to make mtGenomes from each individual in your RAD data set.
+#### 0. Prepare your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files and a reference mitchondrial genome
+
+Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for RAD data.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
+
+```
+# files must end with [FR].fq.gz
+# only 1 underscore should occur, and it should delimit the population idenity and the individual identity.  
+# every individual must have a different identity
+Population_UniqueIndividualID.F.fq.gz
+Population_UniqueIndividualID.R.fq.gz
+```
+
+It is also assumed that you have a fully assembled mitochondrial genome saved as a [FASTA](https://en.wikipedia.org/wiki/FASTA) file. You should name the reference mtGenome used for mapping sequence reads as follows:
+
+```
+# no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters.
+reference.*.*.fasta
+```
 
 #### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
