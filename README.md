@@ -40,8 +40,11 @@ cp dDocentHPC/config.4.all .
 mkdir mkBAM
 cp radBARCODER/*bash mkBAM
 cp radBARCODER/*R mkBAM
+```
 
-# assumed directory structure:
+Assumed directory structure:
+
+```
 $ tree ../ProjectDir
 ProjectDir
  ├──dDocentHPC
