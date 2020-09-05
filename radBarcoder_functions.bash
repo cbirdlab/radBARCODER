@@ -210,6 +210,8 @@ mkConsensusFasta(){
 		local LOCUS=$5
 		local THREADS=$6
 		local cvgForCall=$7
+		local nontargetNAME=$8
+		local targetNAME=$9
 
 	#split up fasta for making consensus seqs and name files according to seq id
 		#split up fasta by sequence and make list of file names
@@ -223,18 +225,18 @@ mkConsensusFasta(){
 
 	#make consensus sequence from outlier fish
 		parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		Rscript consensusSeq.R ${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ${PREFIX}NonTargetTaxon_masked_aligned_consensus_$LOCUS.fasta $cvgForCall Outlier_Consensus
+		Rscript consensusSeq.R ${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ${PREFIX}NonTargetTaxon_masked_aligned_consensus_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish
 		parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${targetIDs[@]} |  sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		Rscript consensusSeq.R ${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ${PREFIX}TargetTaxon_masked_aligned_consensus_$LOCUS.fasta $cvgForCall Normal_Consensus
+		Rscript consensusSeq.R ${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ${PREFIX}TargetTaxon_masked_aligned_consensus_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish for each sample location
 		ncbiNAMES=($(echo ${seqNAMES[@]} | tr " " "\n" ))
 		for i in ${POPS[@]}; do
 			popIDs=($(echo ${targetIDs[@]} | tr " " "\n" | grep "^$i"))
 			parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta
-			Rscript consensusSeq.R ${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta ${PREFIX}${i}_masked_aligned_consensus_$LOCUS.fasta $cvgForCall ${i}_Consensus
+			Rscript consensusSeq.R ${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta ${PREFIX}${i}_masked_aligned_consensus_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
 
 			#get list of NCBI seqs
 				ncbiNAMES=($(echo ${ncbiNAMES[@]} | tr " " "\n" | grep -v "$i"))
