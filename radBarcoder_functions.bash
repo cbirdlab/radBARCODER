@@ -219,7 +219,7 @@ alignLocusBySample(){
 		
 		#mv ${FILE%.*}.tsv out_align
 		#mv ${PREFIX}ALL_masked_aligned_$LOCUS.fasta out_align
-		
+}		
 export -f alignLocusBySample
 
 #function to make consensus sequences from aligned fasta files
