@@ -282,7 +282,7 @@ mkMetaMitoGenomes(){
 		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${ncbiNAMES[@]} > ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
 
 	#concatenate consensus sequences into 1 file
-		cat ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}*_masked_aligned_metageno_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
+		cat ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}*_masked_aligned_metageno_$LOCUS.fasta > ./out_metageno/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 	#mafft makes a bunch of sites with all indels due to a few poorly aligned sequences, remove gap only sites
 		seaview -convert -output_format fasta -o ./out_metageno/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.fasta -del_gap_only_sites ./out_metageno/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 	#convert fasta to nexus non interleaved
