@@ -64,10 +64,10 @@ bam2fasta(){
 		fi
 		
 	# calculate coverage at each base from bam file and return a bed file with positions that have no coverage
-		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > $ID2.bed
+		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > out_bam2fasta/$ID2.bed
 		
 	# create masked fasta for each individual
-		bedtools maskfasta -fi $REF -fo ${ID2}_masked_ref.fasta -bed $ID2.bed
+		bedtools maskfasta -fi $REF -fo ${ID2}_masked_ref.fasta -bed out_bam2fasta/$ID2.bed
 		
 	# make vcf files
 		bcftools mpileup --threads 1 -d 30000 -q 30 -Q 20 -A -O z -o ${ID2}_masked_pile.vcf.gz -f ${ID2}_masked_ref.fasta ${ID2}.bam
@@ -86,7 +86,7 @@ bam2fasta(){
 		sed -i "s/^>/>${ID}_/g" bam2fasta/${ID2}_masked_consensus.fasta
 		
 	# clean up files
-		mv $ID2.bed out_bam2fasta
+		# mv $ID2.bed out_bam2fasta
 		mv ${ID2}_masked_ref.fasta* out_bam2fasta
 		mv ${ID2}_masked_calls_normalized.vcf.gz* out_bam2fasta
 		mv ${ID2}_masked_calls.vcf.gz* out_bam2fasta
