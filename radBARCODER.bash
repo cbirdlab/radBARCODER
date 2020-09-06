@@ -53,7 +53,7 @@ reportVARS
 #set other variables
 #REF=reference${CUTOFFS}.fasta
 #bamPATTERN=$CUTOFFS-RG
-IDs=($(ls *$bamPATTERN | sed "s/$bamPATTERN//g" | grep -v '^cat' 2> /dev/null))
+IDs=($(ls *$bamPATTERN 2> /dev/null | sed "s/$bamPATTERN//g" 2> /dev/null | grep -v '^cat'))
 echo ""; echo `date` $(echo ${IDs[@]} | tr " " "\n" | wc -l) SAMPLES BEING PROCESSED: 
 echo ${IDs[@]}
 echo ""
