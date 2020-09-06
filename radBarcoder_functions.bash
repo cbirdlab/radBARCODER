@@ -49,29 +49,36 @@ ntrlvdFasta2Fasta(){
 export -f ntrlvdFasta2Fasta
 
 
-#function to create consensus sequences using individually masked reference genomes
-	#superior to using a single unmasked reference genome
-	#designed to be run in parallel
+# function to create consensus sequences using individually masked reference genomes
+	# superior to using a single unmasked reference genome
+	# designed to be run in parallel
 bam2fasta(){
-	#assign arguments to variables
+	# assign arguments to variables
 		local ID=$1							#*_Pfa*
 		local ID2=$1$2						#*_Pfa*$CUTOFFS-FLTR_F4
 		local REF=$3						#unmasked reference genome
-	#calculate coverage at each base from bam file and return a bed file with positions that have no coverage
+	# calculate coverage at each base from bam file and return a bed file with positions that have no coverage
 		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > $ID2.bed
-	#create masked fasta for each individual
+	# create masked fasta for each individual
 		bedtools maskfasta -fi $REF -fo ${ID2}_masked_ref.fasta -bed $ID2.bed
-	#make vcf files
+	# make vcf files
 		bcftools mpileup --threads 1 -d 30000 -q 30 -Q 20 -A -O z -o ${ID2}_masked_pile.vcf.gz -f ${ID2}_masked_ref.fasta ${ID2}.bam
-	#call genotypes in vcf, force ploidy=haploid
+	# call genotypes in vcf, force ploidy=haploid
 		bcftools call --threads 1 -m --ploidy 1 -O z -o ${ID2}_masked_calls.vcf.gz ${ID2}_masked_pile.vcf.gz
-	#combine snps and indels into 1 multiallelic call
+	# combine snps and indels into 1 multiallelic call
 		bcftools norm -f ${ID2}_masked_ref.fasta -m +any -O z -o ${ID2}_masked_calls_normalized.vcf.gz ${ID2}_masked_calls.vcf.gz
 		tabix ${ID2}_masked_calls_normalized.vcf.gz
-	#generate 1 consensus for each fishSample
+	# generate 1 consensus for each fishSample
 		bcftools consensus -s $ID -M 'N' -f ${ID2}_masked_ref.fasta ${ID2}_masked_calls_normalized.vcf.gz -o ${ID2}_masked_consensus.fasta
-	#add ID to name of consensus
+	# add ID to name of consensus
 		sed -i "s/^>/>${ID}_/g" ${ID2}_masked_consensus.fasta
+	# clean up files
+		mkdir bam2fasta_out
+		mv ${ID2}_masked_ref.fasta bam2fasta_out
+		mv ${ID2}_masked_calls_normalized.vcf.gz bam2fasta_out
+		mv ${ID2}_masked_calls.vcf.gz bam2fasta_out
+		mv ${ID2}_masked_pile.vcf.gz bam2fasta_out
+		
 }
 export -f bam2fasta
 
