@@ -147,9 +147,9 @@ alignLocusBySample(){
 	fi
 	echo ""; echo `date` CONCATENATING FASTAs...
 	
-	cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta > ./out_align/test1.fasta
-	cat ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta > ./out_align/test2.fasta
-	cat $GENBANK  > ./out_align/test3.fasta
+	#cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta > ./out_align/test1.fasta
+	#cat ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta > ./out_align/test2.fasta
+	#cat $GENBANK  > ./out_align/test3.fasta
 
 	cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta
 		
