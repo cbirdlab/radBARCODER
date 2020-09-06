@@ -1,8 +1,86 @@
 # radBARCODER
 
-scripts to extract, align, and type mtDNA data from restriction site associated DNA sequenced on an [Illumina Machine](https://en.wikipedia.org/wiki/Illumina,_Inc.) with mitochondrial reference genomes of non-model species
+scripts to extract, align, and type mtDNA data from restriction site associated DNA sequenced on an [Illumina Machine](https://en.wikipedia.org/wiki/Illumina,_Inc.) with mitochondrial reference genomes of non-model species on linux/unix computers
 
 ---
+
+## Quick Start
+
+#### 1. Clone repo and put tools in path
+
+```bash
+# assuming OS = Ubuntu
+git clone https://github.com/cbirdlab/radBARCODER.git
+cd radBARCODER
+sudo cp radB* /usr/local/bin
+sudo cp *R /usr/local/bin
+```
+
+#### 2. Install dependencies
+
+These are the packages used by `radBARCODER`. If you install the newest versions, it will work.  More detailed instructions for installation can be found farther down in this document.
+
+* [`parallel`](https://www.gnu.org/software/parallel/) 
+
+* [`bedtools`](https://github.com/arq5x/bedtools2/releases) 
+
+* [`samtools`](https://www.htslib.org/)  
+
+* [`bcftools`](https://samtools.github.io/bcftools/bcftools.html)
+
+* [`pagan2`](http://wasabiapp.org/software/pagan/) 
+
+* [`mafft`](https://mafft.cbrc.jp/alignment/software/) 
+
+* [`seaview`](http://doua.prabi.fr/software/seaview) 
+
+* [`R`](https://www.r-project.org/)
+
+  * [seqinr](https://cran.r-project.org/web/packages/seqinr/index.html)
+  
+  * [stringr](https://cran.r-project.org/web/packages/stringr/index.html)
+
+#### 3. Prep your data
+
+All of the following files should be in a single directory:
+
+* mitochondrial genomes
+
+  * the mitochondrial genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file.
+
+  * One mitochondrial genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This is the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data.
+  
+* locus-specific fasta files
+
+  * if you also want to include incomplete mitochondrial sequences in the alignment, you need a single fasta file with as many sequences as you wish.  These sequences do not need to be aligned.
+
+* `*bam` files
+
+  * Your NGS data should be in the form of binary alignment maps ([BAM](https://en.wikipedia.org/wiki/Binary_Alignment_Map)) that have been created using your NGS data and the reference mitochondrial genome. The `bam` file should also be indexed (see [tabix](https://github.com/samtools/tabix)).  1 `bam` and 1 `bam.bai` per individual. The following naming format is assumed: `Population*UniqueID*bam`
+  
+* Sample classification files
+
+  * `radBARCODER` allows you to classify your samples into two groupings, independent of population classification, that will be used to construct consensus metagenomes.  The purpose of these files is to identify sequences as the expected target taxon or the unexpected taxon that showed up in your NGS data.  The files should be text and contain one ID per line, with the ID matching the pattern used in the `bam` files.  For example: `PopID_IndividualID`. Even if you do not have two groups of samples, you still need one file with the names of all the samples and a second file that is empty.  Naming format of the file, itself, is not important.
+  
+#### 4. Convert `bam` files to `fasta` files
+
+Use `radBARCODER bam2gen` to convert each of the `bam` files to a mitochondrial genome sequence.
+
+```
+#Name of reference mtGenome
+REF=reference.Pfalc.mtGenome.fasta  
+
+#Pattern match to the bam files for every individual (do not include a leading wildcard)
+bamPATTERN=.Pfalc.mtGenome-RG.bam    
+
+#number of processors to use for parallel operations
+THREADS=8    
+
+radBARCODER bam2gen $REF $bamPATTERN $THREADS
+```
+  
+
+
 
 ## Installation and Dependencies
 
@@ -34,7 +112,7 @@ ProjectDir
  │   ├──consensusSeq.R
  │   ├──cullSeqs.R
  │   ├──maximizeBP.R
- │   ├──radBARCODER.bash
+ │   ├──radBARCODER
  │   └──radBarcoder_functions.bash
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
@@ -130,7 +208,7 @@ ProjectDir
  │   ├──consensusSeq.R
  │   ├──cullSeqs.R
  │   ├──maximizeBP.R
- │   ├──radBARCODER.bash
+ │   ├──radBARCODER
  │   ├──radBarcoder_functions.bash
  │   └──reference.*.*.fasta
  ├──pop1_ind1.F.fq.gz
@@ -141,7 +219,9 @@ ProjectDir
 
 ---
 
-## Quick Start
+## Detailed Instructions
+
+If you run into problems with the quick start, then start barcoding your NGS data here.
 
 #### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
 
@@ -220,11 +300,11 @@ bash ../dDocentHPC/dDocentHPC.bash fltrBAM ../config.4.all
 This will create mildly filtered `RG.bam` files for each individual. These alignment maps are used in downstream processing.  You should view the alignment maps with [IGV](https://software.broadinstitute.org/software/igv/download) or an equivalent bam viewer to ensure that mapping and filtering were successful.  Artifacts to look for are reads with too many SNPs (inappropriate alignment score threshold), large insertions at the beginning or ends of reads (adapter and barcode seqs not successfully trimmed), etc.  If your reads were not originally 150 bp, you will probably need to change the alignment settings in the `config.4.all` file and rerun mapping.
 
 
-#### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2fasta`
+#### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2gen`
 
 *Dependencies*: [`parallel`](https://www.gnu.org/software/parallel/) [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`samtools`](https://www.htslib.org/)  [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, all are required by `ddocent`, so you should have these if you made it to this step)
 
-From here forward, you'll be running the `radBARCODER.bash` scripts.  If you have not already, install required missing dependencies and clone the `radBARCODER` repo into your ProjectDir, and move the `radBARCODER` `*bash` and `*R` scripts to the mkBAM dir (see instructions above).
+From here forward, you'll be running the `radBARCODER` scripts.  If you have not already, install required missing dependencies and clone the `radBARCODER` repo into your ProjectDir, and move the `radBARCODER` `*bash` and `*R` scripts to the mkBAM dir (see instructions above).
 
 As a reminder, this is the expected dir structure after completing the previous step (some files and dirs created by trimming and mapping are omitted):
 
@@ -245,7 +325,7 @@ ProjectDir
  │   ├──pop1_ind1.*.*.-RG.bam
  │   ├──pop1_ind1.*.*.-RG.bam.bai
  ...
- │   ├──radBARCODER.bash
+ │   ├──radBARCODER
  │   ├──radBarcoder_functions.bash
  │   └──reference.*.*.fasta
  ├──pop1_ind1.F.fq.gz
@@ -266,19 +346,19 @@ bamPATTERN=.Pfalc.mtGenome-RG.bam
 #number of processors to use for parallel operations
 THREADS=8    
 
-bash radBARCODER.bash bam2fasta $REF $bamPATTERN $THREADS
+radBARCODER bam2gen $REF $bamPATTERN $THREADS
 ```
 
 Successful output looks like this:
 
 ```
 #########################################################################
-Sat 05 Sep 2020 12:51:38 AM CDT RUNNING radBARCODER BAM2FASTA...
+Sat 05 Sep 2020 12:51:38 AM CDT RUNNING radBARCODER BAM2GEN...
 #########################################################################
 
 Sat 05 Sep 2020 12:51:38 AM CDT VARIABLES READ IN:
 
-the function that will be run FUNKTION=......bam2fasta
+the function that will be run FUNKTION=......bam2gen
 the reference genome used to map the reads REF=...........reference.Pfalc.mtGenome.fasta
 the ls pattern shared by all bam files bamPATTERN=.....Pfalc.mtGenome-RG.bam
 the number of cpu cores for the task THREADS=.......4
@@ -308,7 +388,7 @@ Lines   total/split/realigned/skipped:  1087/0/0/0
 Applied 31 variants
 
 #########################################################################
-Sat 05 Sep 2020 12:51:46 AM CDT radBARCODER BAM2FASTA COMPLETED
+Sat 05 Sep 2020 12:51:46 AM CDT radBARCODER BAM2GEN COMPLETED
 #########################################################################
 ```
 
@@ -376,7 +456,7 @@ GENBANKFASTA=""
 # specify whether pagan (FALSE) or mafft (TRUE) is used to align.  pagan is better
 LONGALIGNMENT=FALSE
 
-bash radBARCODER.bash align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
+radBARCODER align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
 Successful output looks like this:
@@ -454,35 +534,35 @@ Update the following variable assignments and run `radBARCODER`:
 ```bash
 FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 PCT=99
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=95
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=90
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=85
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=80
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=75
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=70
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=50
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=30
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=25
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=20
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=15
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=10
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=5
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 PCT=1
-bash radBARCODER.bash maximizeBP $FASTA $PCT
+radBARCODER maximizeBP $FASTA $PCT
 
 ```
 
@@ -558,7 +638,7 @@ targetIDs=$(cat Pfalcifer.txt)
 targetNAME=Pfa
 POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
 cvgForCall=1
-bash radBARCODER.bash mkMETAGEN "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+radBARCODER mkMETAGEN "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 ```
 
 Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
