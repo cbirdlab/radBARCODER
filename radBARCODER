@@ -60,15 +60,15 @@ echo ""
 bamPATTERN=${bamPATTERN%.*}
 LONGALIGNMENT=$(echo $LONGALIGNMENT | tr [a-z] [A-Z])
 
-if [ "$FUNKTION" == "bam2gen" ]; then
+if [ "$FUNKTION" == "bam2GENO" ]; then
 	#create fasta sequences of mtGenome for each individual using individually masked reference genomes
-	echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "bam2gen {} $bamPATTERN $REF"
+	echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "bam2GENO {} $bamPATTERN $REF"
 	#concatenate the fasta mtGenome sequences from each fish
-	cat ./out_bam2gen/*${bamPATTERN}_masked_consensus.fasta > ./out_bam2gen/all${bamPATTERN}_masked_consensus.fasta
-elif [ "$FUNKTION" == "align" ]; then
+	cat ./out_bam2GENO/*${bamPATTERN}_masked_consensus.fasta > ./out_bam2GENO/all${bamPATTERN}_masked_consensus.fasta
+elif [ "$FUNKTION" == "aliGENO" ]; then
 	#get locus of choice from masked consensus seqs, mito genomes, and NCBI nucleotide seqs, clean and align
-	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $REF $GENBANK  
-elif [ "$FUNKTION" == "mkMETAGEN" ]; then
+	aliGENO $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $REF $GENBANK  
+elif [ "$FUNKTION" == "mkMETAGENO" ]; then
 	#make consensus sequences from aligned fasta files
 		nontargetIDs=$2
 		targetIDs=$3
@@ -80,13 +80,13 @@ elif [ "$FUNKTION" == "mkMETAGEN" ]; then
 		nontargetNAME=$9
 		targetNAME=${10}
 		reportVARS
-		mkMetaMitoGenomes nontargetIDs targetIDs POPS $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
-elif [ "$FUNKTION" == "maximizeBP" ]; then
+		mkMETAGENO nontargetIDs targetIDs POPS $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+elif [ "$FUNKTION" == "cullGENO" ]; then
 	#maximize the number of bp retained at the expense of retaining individuals
 		FASTA=$2
 		PCT=$3
 		echo; echo `date` "Be sure to check the fasta alignment by eye as small errors do occur"
-		maximizeBP $FASTA $PCT
+		cullGENO $FASTA $PCT
 fi
 
 echo ""; 
