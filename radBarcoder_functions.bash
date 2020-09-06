@@ -158,25 +158,28 @@ alignLocusBySample(){
 			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
 			pagan2 -s ${PREFIX}MtGenomes_$LOCUS.fasta -o ref
 			ls PrePaganAligned_*fasta | sed -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ref.fas -r ref.tre -q Pre{}.fasta -o {} --pileup --no-terminal-edges --silent"
+			rm PrePaganAligned_*fasta
 			ls PaganAligned*fas | sed 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta {}.fas {}.fasta FALSE"
-			rm PaganAligned*fas
-			ls PaganAligned*fasta | parallel --no-notice -j $THREADS "tail -n2 {}" | sed 's/\(.\)>/\1\n>/' > PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{15\}\(----------\)/\1NNNNNNNNNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{14\}\(----------\)/\1NNNNNNNNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{13\}\(----------\)/\1NNNNNNNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{12\}\(----------\)/\1NNNNNNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{11\}\(----------\)/\1NNNNNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{10\}\(----------\)/\1NNNNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{9\}\(----------\)/\1NNNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{8\}\(----------\)/\1NNNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{7\}\(----------\)/\1NNNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{6\}\(----------\)/\1NNNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{5\}\(----------\)/\1NNNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{4\}\(----------\)/\1NNNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{3\}\(----------\)/\1NNN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{2\}\(----------\)/\1NN\2/g' PaganAligned_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{1\}\(----------\)/\1N\2/g' PaganAligned_RAD.fasta
-			cat <(cat $(ls PaganAligned*fasta | head -n1) | head -n ${LinesInMtGenomes}) PaganAligned_RAD.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fas
+			rm PaganAligned*fas ref.tre ref.fas
+			ls PaganAligned*fasta | parallel --no-notice -j $THREADS "tail -n2 {}" | sed 's/\(.\)>/\1\n>/' > PaganAlign_RAD.fasta
+			mkdir align_out
+			mv PaganAligned*fasta align_out
+			sed -i 's/\(----------\)[ACTGN]\{15\}\(----------\)/\1NNNNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{14\}\(----------\)/\1NNNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{13\}\(----------\)/\1NNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{12\}\(----------\)/\1NNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{11\}\(----------\)/\1NNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{10\}\(----------\)/\1NNNNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{9\}\(----------\)/\1NNNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{8\}\(----------\)/\1NNNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{7\}\(----------\)/\1NNNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{6\}\(----------\)/\1NNNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{5\}\(----------\)/\1NNNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{4\}\(----------\)/\1NNNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{3\}\(----------\)/\1NNN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{2\}\(----------\)/\1NN\2/g' PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{1\}\(----------\)/\1N\2/g' PaganAlign_RAD.fasta
+			cat <(cat $(ls PaganAligned*fasta | head -n1) | head -n ${LinesInMtGenomes}) PaganAlign_RAD.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fas
 
 			mv ${PREFIX}ALL_masked_aligned_$LOCUS.fas ${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
 		fi
