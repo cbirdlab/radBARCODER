@@ -272,8 +272,8 @@ mkMetaMitoGenomes(){
 		ncbiNAMES=($(echo ${seqNAMES[@]} | tr " " "\n" ))
 		for i in ${POPS[@]}; do
 			popIDs=($(echo ${targetIDs[@]} | tr " " "\n" | grep "^$i"))
-			parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta
-			Rscript consensusSeq.R ./out_metageno/${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}${i}_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
+			parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta
+			Rscript consensusSeq.R ./out_metageno/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
 
 			#get list of NCBI seqs
 				ncbiNAMES=($(echo ${ncbiNAMES[@]} | tr " " "\n" | grep -v "$i"))
@@ -283,11 +283,17 @@ mkMetaMitoGenomes(){
 		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${ncbiNAMES[@]} > ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
 
 	#concatenate consensus sequences into 1 file
+		cat ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}*Taxon_masked_aligned_metageno_$LOCUS.fasta > ./out_metageno/${PREFIX}TAXA_masked_aligned_metageno_$LOCUS.fasta
+		cat ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}*POP_masked_aligned_metageno_$LOCUS.fasta > ./out_metageno/${PREFIX}POPS_masked_aligned_metageno_$LOCUS.fasta
 		cat ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}*_masked_aligned_metageno_$LOCUS.fasta > ./out_metageno/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 	#mafft makes a bunch of sites with all indels due to a few poorly aligned sequences, remove gap only sites
 		seaview -convert -output_format fasta -o ./out_metageno/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.fasta -del_gap_only_sites ./out_metageno/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
-	#convert fasta to nexus non interleaved
+		seaview -convert -output_format fasta -o ./out_metageno/${PREFIX}TAXA_masked_aligned_clean_metageno_$LOCUS.fasta -del_gap_only_sites ./out_metageno/${PREFIX}TAXA_masked_aligned_metageno_$LOCUS.fasta
+		seaview -convert -output_format fasta -o ./out_metageno/${PREFIX}POPS_masked_aligned_clean_metageno_$LOCUS.fasta -del_gap_only_sites ./out_metageno/${PREFIX}POPS_masked_aligned_metageno_$LOCUS.fasta
+#convert fasta to nexus non interleaved
 		seaview -convert -output_format nexus -o ./out_metageno/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.nex ./out_metageno/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.fasta
+		seaview -convert -output_format nexus -o ./out_metageno/${PREFIX}TAXA_masked_aligned_clean_metageno_$LOCUS.nex ./out_metageno/${PREFIX}TAXA_masked_aligned_clean_metageno_$LOCUS.fasta
+		seaview -convert -output_format nexus -o ./out_metageno/${PREFIX}POPS_masked_aligned_clean_metageno_$LOCUS.nex ./out_metageno/${PREFIX}POPS_masked_aligned_clean_metageno_$LOCUS.fasta
 }
 
 #function to maximize the number of bp retained at the expense of retaining individuals
