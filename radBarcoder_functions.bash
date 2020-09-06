@@ -64,33 +64,33 @@ bam2fasta(){
 		fi
 		
 	# calculate coverage at each base from bam file and return a bed file with positions that have no coverage
-		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > out_bam2fasta/$ID2.bed
+		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > ./out_bam2fasta/$ID2.bed
 		
 	# create masked fasta for each individual
-		bedtools maskfasta -fi $REF -fo ${ID2}_masked_ref.fasta -bed out_bam2fasta/$ID2.bed
+		bedtools maskfasta -fi $REF -fo ./out_bam2fasta/${ID2}_masked_ref.fasta -bed ./out_bam2fasta/$ID2.bed
 		
 	# make vcf files
-		bcftools mpileup --threads 1 -d 30000 -q 30 -Q 20 -A -O z -o ${ID2}_masked_pile.vcf.gz -f ${ID2}_masked_ref.fasta ${ID2}.bam
+		bcftools mpileup --threads 1 -d 30000 -q 30 -Q 20 -A -O z -o ./out_bam2fasta/${ID2}_masked_pile.vcf.gz -f ./out_bam2fasta/${ID2}_masked_ref.fasta ${ID2}.bam
 		
 	# call genotypes in vcf, force ploidy=haploid
-		bcftools call --threads 1 -m --ploidy 1 -O z -o ${ID2}_masked_calls.vcf.gz ${ID2}_masked_pile.vcf.gz
+		bcftools call --threads 1 -m --ploidy 1 -O z -o ./out_bam2fasta/${ID2}_masked_calls.vcf.gz ./out_bam2fasta/${ID2}_masked_pile.vcf.gz
 		
 	# combine snps and indels into 1 multiallelic call
-		bcftools norm -f ${ID2}_masked_ref.fasta -m +any -O z -o ${ID2}_masked_calls_normalized.vcf.gz ${ID2}_masked_calls.vcf.gz
-		tabix ${ID2}_masked_calls_normalized.vcf.gz
+		bcftools norm -f ${ID2}_masked_ref.fasta -m +any -O z -o ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz ./out_bam2fasta/${ID2}_masked_calls.vcf.gz
+		tabix ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz
 		
 	# generate 1 consensus for each fishSample
-		bcftools consensus -s $ID -M 'N' -f ${ID2}_masked_ref.fasta ${ID2}_masked_calls_normalized.vcf.gz -o bam2fasta/${ID2}_masked_consensus.fasta
+		bcftools consensus -s $ID -M 'N' -f ./out_bam2fasta/${ID2}_masked_ref.fasta ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz -o ./out_bam2fasta/${ID2}_masked_consensus.fasta
 		
 	# add ID to name of consensus
-		sed -i "s/^>/>${ID}_/g" bam2fasta/${ID2}_masked_consensus.fasta
+		sed -i "s/^>/>${ID}_/g" ./out_bam2fasta/${ID2}_masked_consensus.fasta
 		
 	# clean up files
 		# mv $ID2.bed out_bam2fasta
-		mv ${ID2}_masked_ref.fasta* out_bam2fasta
-		mv ${ID2}_masked_calls_normalized.vcf.gz* out_bam2fasta
-		mv ${ID2}_masked_calls.vcf.gz* out_bam2fasta
-		mv ${ID2}_masked_pile.vcf.gz* out_bam2fasta
+		#mv ${ID2}_masked_ref.fasta* out_bam2fasta
+		#mv ${ID2}_masked_calls_normalized.vcf.gz* out_bam2fasta
+		#mv ${ID2}_masked_calls.vcf.gz* out_bam2fasta
+		#mv ${ID2}_masked_pile.vcf.gz* out_bam2fasta
 		
 }
 export -f bam2fasta
