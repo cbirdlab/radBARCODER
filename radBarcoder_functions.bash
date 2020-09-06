@@ -103,7 +103,9 @@ alignLocusBySample(){
 
 		# local name=$7[@]
 		# local IDs=("${!name}")
-		
+	
+	echo ""; echo Genbank: $GENBANK; echo ""
+	
 	# make output dir
 	if [ ! -d out_align ]; then
 		mkdir out_align
