@@ -244,9 +244,10 @@ mkMetaMitoGenomes(){
 		local targetNAME=$9
 		
 	# make output dir
-	if [ ! -d out_metageno ]; then
-		mkdir out_metageno
+	if [ -d out_metageno ]; then
+		rm -rf out_metageno
 	fi
+	mkdir out_metageno
 	
 	#split up fasta for making consensus seqs and name files according to seq id
 		#split up fasta by sequence and make list of file names
@@ -260,11 +261,11 @@ mkMetaMitoGenomes(){
 			# parallel -j $THREADS -k --no-notice --link "echo {1} {2}" ::: ${fileNAMES[@]} ::: ${seqNAMES[@]}
 
 	#make consensus sequence from outlier fish
-		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
+		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
 		Rscript consensusSeq.R ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish
-		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${targetIDs[@]} |  sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta
+		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${targetIDs[@]} |  sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta
 		Rscript consensusSeq.R ./out_metageno/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}TargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish for each sample location
@@ -279,7 +280,7 @@ mkMetaMitoGenomes(){
 		done
 
 	#get ncbi seqs
-		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${ncbiNAMES[@]} > ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
+		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${ncbiNAMES[@]} > ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
 
 	#concatenate consensus sequences into 1 file
 		cat ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}*_masked_aligned_metageno_$LOCUS.fasta > ./out_metageno/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
