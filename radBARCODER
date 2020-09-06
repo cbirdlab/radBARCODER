@@ -60,11 +60,11 @@ echo ""
 bamPATTERN=${bamPATTERN%.*}
 LONGALIGNMENT=$(echo $LONGALIGNMENT | tr [a-z] [A-Z])
 
-if [ "$FUNKTION" == "bam2fasta" ]; then
+if [ "$FUNKTION" == "bam2gen" ]; then
 	#create fasta sequences of mtGenome for each individual using individually masked reference genomes
-	echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "bam2fasta {} $bamPATTERN $REF"
+	echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "bam2gen {} $bamPATTERN $REF"
 	#concatenate the fasta mtGenome sequences from each fish
-	cat ./out_bam2fasta/*${bamPATTERN}_masked_consensus.fasta > ./out_bam2fasta/all${bamPATTERN}_masked_consensus.fasta
+	cat ./out_bam2gen/*${bamPATTERN}_masked_consensus.fasta > ./out_bam2gen/all${bamPATTERN}_masked_consensus.fasta
 elif [ "$FUNKTION" == "align" ]; then
 	#get locus of choice from masked consensus seqs, mito genomes, and NCBI nucleotide seqs, clean and align
 	alignLocusBySample $PREFIX $THREADS $bamPATTERN $POSITIONS $LOCUS "$mtGenPATTERN" $LONGALIGNMENT $REF $GENBANK  
