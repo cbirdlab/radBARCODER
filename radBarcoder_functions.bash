@@ -242,45 +242,51 @@ mkMetaMitoGenomes(){
 		local cvgForCall=$7
 		local nontargetNAME=$8
 		local targetNAME=$9
-
+		
+	# make output dir
+	if [ ! -d out_align ]; then
+		mkdir out_metageno
+	fi
+	
 	#split up fasta for making consensus seqs and name files according to seq id
 		#split up fasta by sequence and make list of file names
-			csplit --quiet --digits=4 --prefix=split${PREFIX}_masked_aligned_clean_$LOCUS.fasta ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta "/^>/+0" "{*}"
+			csplit --quiet --digits=4 --prefix=split${PREFIX}_masked_aligned_clean_$LOCUS.fasta ./out_align/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta "/^>/+0" "{*}"
 			rm split${PREFIX}_masked_aligned_clean_$LOCUS.fasta0000
-			local fileNAMES=($(ls split${PREFIX}_masked_aligned_clean_$LOCUS.fasta*))
+			mv split${PREFIX}_masked_aligned_clean_$LOCUS.fasta* out_metageno
+			local fileNAMES=($(ls ./out_metageno/split${PREFIX}_masked_aligned_clean_$LOCUS.fasta*))
 			local seqNAMES=($(parallel -j $THREADS -k --no-notice "grep '^>' {} | sed 's/>//g' " ::: ${fileNAMES[@]}))
 		#rename the files by sequence name
-			parallel -j $THREADS -k --no-notice --link "mv {1} ${PREFIX}{2}_masked_aligned_clean_$LOCUS.fasta" ::: ${fileNAMES[@]} ::: ${seqNAMES[@]}
+			parallel -j $THREADS -k --no-notice --link "mv {1} ./out_metageno/${PREFIX}{2}_masked_aligned_clean_$LOCUS.fasta" ::: ${fileNAMES[@]} ::: ${seqNAMES[@]}
 			parallel -j $THREADS -k --no-notice --link "echo {1} {2}" ::: ${fileNAMES[@]} ::: ${seqNAMES[@]}
 
 	#make consensus sequence from outlier fish
-		parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		Rscript consensusSeq.R ${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ${PREFIX}NonTargetTaxon_masked_aligned_consensus_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
+		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
+		Rscript consensusSeq.R ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish
-		parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${targetIDs[@]} |  sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		Rscript consensusSeq.R ${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ${PREFIX}TargetTaxon_masked_aligned_consensus_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
+		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${targetIDs[@]} |  sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta
+		Rscript consensusSeq.R ./out_metageno/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}TargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish for each sample location
 		ncbiNAMES=($(echo ${seqNAMES[@]} | tr " " "\n" ))
 		for i in ${POPS[@]}; do
 			popIDs=($(echo ${targetIDs[@]} | tr " " "\n" | grep "^$i"))
-			parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta
-			Rscript consensusSeq.R ${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta ${PREFIX}${i}_masked_aligned_consensus_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
+			parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta
+			Rscript consensusSeq.R ./out_metageno/${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}${i}_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
 
 			#get list of NCBI seqs
 				ncbiNAMES=($(echo ${ncbiNAMES[@]} | tr " " "\n" | grep -v "$i"))
 		done
 
 	#get ncbi seqs
-		parallel -j $THREADS -k --no-notice "cat ${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${ncbiNAMES[@]} > ${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
+		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${ncbiNAMES[@]} > ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
 
 	#concatenate consensus sequences into 1 file
-		cat ${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ${PREFIX}*_masked_aligned_consensus_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_metamitogen_$LOCUS.fasta
+		cat ./out_metageno/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}*_masked_aligned_metageno_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 	#mafft makes a bunch of sites with all indels due to a few poorly aligned sequences, remove gap only sites
-		seaview -convert -output_format fasta -o ${PREFIX}ALL_masked_aligned_clean_metamitogen_$LOCUS.fasta -del_gap_only_sites ${PREFIX}ALL_masked_aligned_metamitogen_$LOCUS.fasta
+		seaview -convert -output_format fasta -o ./out_metageno/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.fasta -del_gap_only_sites ./out_metageno/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 	#convert fasta to nexus non interleaved
-		seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_metamitogen_$LOCUS.nex ${PREFIX}ALL_masked_aligned_clean_metamitogen_$LOCUS.fasta
+		seaview -convert -output_format nexus -o ./out_metageno/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.nex ./out_metageno/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.fasta
 }
 
 #function to maximize the number of bp retained at the expense of retaining individuals
