@@ -76,7 +76,7 @@ bam2fasta(){
 		bcftools call --threads 1 -m --ploidy 1 -O z -o ./out_bam2fasta/${ID2}_masked_calls.vcf.gz ./out_bam2fasta/${ID2}_masked_pile.vcf.gz
 		
 	# combine snps and indels into 1 multiallelic call
-		bcftools norm -f ${ID2}_masked_ref.fasta -m +any -O z -o ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz ./out_bam2fasta/${ID2}_masked_calls.vcf.gz
+		bcftools norm -f ./out_bam2fasta/${ID2}_masked_ref.fasta -m +any -O z -o ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz ./out_bam2fasta/${ID2}_masked_calls.vcf.gz
 		tabix ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz
 		
 	# generate 1 consensus for each fishSample
