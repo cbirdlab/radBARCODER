@@ -297,7 +297,7 @@ mkMETAGENO(){
 }
 
 #function to maximize the number of bp retained at the expense of retaining individuals
-maxBP(){
+cullGENO(){
 	#read arguments into variables
 	local INFILE=$1
 	local pctMissCall=$2
