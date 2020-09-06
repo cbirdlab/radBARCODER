@@ -129,48 +129,37 @@ alignLocusBySample(){
 		#need to code, right now, just download as 1 big fasta
 
 	#Combine fastas, make sure to add genbank nucleotide recs as neccessary
-		if [ ! -z "$GENBANK" ]; then
-			echo ""; echo `date` ADDING $GENBANK SEQUENCES FROM GENBANK...
-		else
-			echo ""; echo `date` NO ADDITIONAL GENBANK SEQUENCES SPECIFIED, CONTINUING WITHOUT THEM...
-		fi
-		echo ""; echo `date` CONCATENATING FASTAs...
-		cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta
+	if [ ! -z "$GENBANK" ]; then
+		echo ""; echo `date` ADDING $GENBANK SEQUENCES FROM GENBANK...
+	else
+		echo ""; echo `date` NO ADDITIONAL GENBANK SEQUENCES SPECIFIED, CONTINUING WITHOUT THEM...
+	fi
+	echo ""; echo `date` CONCATENATING FASTAs...
+	cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta
 		
 	# Align all_*.fasta
 	echo ""; echo `date` ALIGNING SEQUENCES WITH $(if [ "$LONGALIGNMENT" == "TRUE" ]; then echo -n MAFFT; else echo -n pagan2; fi)...
-		#clustalw -infile=${PREFIX}ALL_masked_$LOCUS.fasta -align -type=DNA -output=NEXUS -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.nex
-		#clustalo -infile=${PREFIX}ALL_masked_$LOCUS.fasta -t DNA --outfmt=fa -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.fasta --threads $THREADS
-		#mafft --thread $THREADS ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
-		#mafft --thread $THREADS --ep 0.123 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 		echo ""
 		if [ "$LONGALIGNMENT" == "TRUE" ] || [ "$LONGALIGNMENT" == "T" ]; then
+			#clustalw -infile=${PREFIX}ALL_masked_$LOCUS.fasta -align -type=DNA -output=NEXUS -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.nex
+			#clustalo -infile=${PREFIX}ALL_masked_$LOCUS.fasta -t DNA --outfmt=fa -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.fasta --threads $THREADS
+			#mafft --thread $THREADS ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
+			#mafft --thread $THREADS --ep 0.123 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 			mafft --thread $THREADS --globalpair --maxiterate 1000 ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta > ./out_align/${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 		else
-			# my first try at making this work
-			# pagan2 -s ${PREFIX}ALL_masked_$LOCUS.fasta -o ${PREFIX}ALL_masked_aligned_$LOCUS --threads $THREADS
-
-			# second method from author of pagan, getting run out of memory error
-			#sed 's/N\{20,\}/N/g' ${PREFIX}RAD_masked_${LOCUS}_clean.fasta > ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta
-			#pagan2 -s ${PREFIX}MtGenomes_$LOCUS.fasta -o ref
-			#pagan2 -a ref.fas -r ref.tre -q ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta -o ${PREFIX}ALL_masked_aligned_$LOCUS --pileup --no-terminal-edges
-
-			# third method from author of pagan
-			#sed -i 's/N\{20,\}/N/g' ${PREFIX}ALL_masked_${LOCUS}.fasta
-			#pagan2 -q ${PREFIX}ALL_masked_$LOCUS.fasta -o ${PREFIX}ALL_masked_aligned_$LOCUS --pileup --no-terminal-edges
-
 			# my solution for pagan alignment: align 1 individual at a time to the mulitiple ref genomes
 			echo `date` ALIGNING RAD DATA TO MITOGENOMES...
 			sed 's/N\{20,\}/N/g' ./out_align/${PREFIX}ALL_masked_${LOCUS}.fasta > ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta
 			
 			IndivNames=($(cat ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f1))
+			echo ""; echo Print IndivNames:; echo ${IndivNames[@]}; echo ""
 			IndivSeqs=($(cat ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f2))
 
 			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > ./out_align/PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
 			pagan2 -s ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta -o ./out_align/ref
-			ls ./out_align/PrePaganAligned_*fasta | sed -e 's/out_align\///' -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ./out_align/ref.fas -r ./out_align/ref.tre -q ./out_align/Pre{}.fasta -o ./out_align/{} --pileup --no-terminal-edges --silent"
+			ls ./out_align/PrePaganAligned_*fasta | sed -e 's/\.\/out_align\///' -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ./out_align/ref.fas -r ./out_align/ref.tre -q ./out_align/Pre{}.fasta -o ./out_align/{} --pileup --no-terminal-edges --silent"
 			
-			ls ./out_align/PaganAligned*fas | sed -e 's/out_align\///' -e 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta ./out_align/{}.fas ./out_align/{}.fasta FALSE"
+			ls ./out_align/PaganAligned*fas | sed -e 's/\.\/out_align\///' -e 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta ./out_align/{}.fas ./out_align/{}.fasta FALSE"
 			
 			ls ./out_align/PaganAligned*fasta | parallel --no-notice -j $THREADS "tail -n2 {}" | sed 's/\(.\)>/\1\n>/' > ./out_align/PaganAlign_RAD.fasta
 			sed -i 's/\(----------\)[ACTGN]\{15\}\(----------\)/\1NNNNNNNNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
@@ -189,8 +178,8 @@ alignLocusBySample(){
 			sed -i 's/\(----------\)[ACTGN]\{2\}\(----------\)/\1NN\2/g' ./out_align/PaganAlign_RAD.fasta
 			sed -i 's/\(----------\)[ACTGN]\{1\}\(----------\)/\1N\2/g' ./out_align/PaganAlign_RAD.fasta
 			cat <(cat $(ls ./out_align/PaganAligned*fasta | head -n1) | head -n ${LinesInMtGenomes}) ./out_align/PaganAlign_RAD.fasta > ./out_align/${PREFIX}ALL_masked_aligned_$LOCUS.fasta
-			#mv ./out_align/${PREFIX}ALL_masked_aligned_$LOCUS.fas ./out_align/${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
 		fi
+		
 	echo ""; echo `date` Making sure all individuals have same number of nucleotides plus indels
 		# count up nucleotides
 		FILE=./out_align/${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
