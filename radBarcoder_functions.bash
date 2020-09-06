@@ -98,8 +98,9 @@ alignLocusBySample(){
 		local LOCUS=$5
 		local mtGenPATTERN="$6"	
 		local LONGALIGNMENT=$7
-		local GENBANK=$8
-		local REF=$9
+		local REF=$8
+		local GENBANK=$9
+
 
 		# local name=$7[@]
 		# local IDs=("${!name}")
