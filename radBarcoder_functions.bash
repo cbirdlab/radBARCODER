@@ -52,40 +52,40 @@ export -f ntrlvdFasta2Fasta
 # function to create consensus sequences using individually masked reference genomes
 	# superior to using a single unmasked reference genome
 	# designed to be run in parallel
-bam2fasta(){
+bam2gen(){
 	# assign arguments to variables
 		local ID=$1							#*_Pfa*
 		local ID2=$1$2						#*_Pfa*$CUTOFFS-FLTR_F4
 		local REF=$3						#unmasked reference genome
 		
 	# make output dir	
-		if [ ! -d out_bam2fasta ]; then
-			mkdir out_bam2fasta
+		if [ ! -d out_bam2gen ]; then
+			mkdir out_bam2gen
 		fi
 		
 	# calculate coverage at each base from bam file and return a bed file with positions that have no coverage
-		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > ./out_bam2fasta/$ID2.bed
+		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > ./out_bam2gen/$ID2.bed
 		
 	# create masked fasta for each individual
-		bedtools maskfasta -fi $REF -fo ./out_bam2fasta/${ID2}_masked_ref.fasta -bed ./out_bam2fasta/$ID2.bed
+		bedtools maskfasta -fi $REF -fo ./out_bam2gen/${ID2}_masked_ref.fasta -bed ./out_bam2gen/$ID2.bed
 		
 	# make vcf files
-		bcftools mpileup --threads 1 -d 30000 -q 30 -Q 20 -A -O z -o ./out_bam2fasta/${ID2}_masked_pile.vcf.gz -f ./out_bam2fasta/${ID2}_masked_ref.fasta ${ID2}.bam
+		bcftools mpileup --threads 1 -d 30000 -q 30 -Q 20 -A -O z -o ./out_bam2gen/${ID2}_masked_pile.vcf.gz -f ./out_bam2gen/${ID2}_masked_ref.fasta ${ID2}.bam
 		
 	# call genotypes in vcf, force ploidy=haploid
-		bcftools call --threads 1 -m --ploidy 1 -O z -o ./out_bam2fasta/${ID2}_masked_calls.vcf.gz ./out_bam2fasta/${ID2}_masked_pile.vcf.gz
+		bcftools call --threads 1 -m --ploidy 1 -O z -o ./out_bam2gen/${ID2}_masked_calls.vcf.gz ./out_bam2gen/${ID2}_masked_pile.vcf.gz
 		
 	# combine snps and indels into 1 multiallelic call
-		bcftools norm -f ./out_bam2fasta/${ID2}_masked_ref.fasta -m +any -O z -o ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz ./out_bam2fasta/${ID2}_masked_calls.vcf.gz
-		tabix ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz
+		bcftools norm -f ./out_bam2gen/${ID2}_masked_ref.fasta -m +any -O z -o ./out_bam2gen/${ID2}_masked_calls_normalized.vcf.gz ./out_bam2gen/${ID2}_masked_calls.vcf.gz
+		tabix ./out_bam2gen/${ID2}_masked_calls_normalized.vcf.gz
 		
 	# generate 1 consensus for each fishSample
-		bcftools consensus -s $ID -M 'N' -f ./out_bam2fasta/${ID2}_masked_ref.fasta -o ./out_bam2fasta/${ID2}_masked_consensus.fasta ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz 
+		bcftools consensus -s $ID -M 'N' -f ./out_bam2gen/${ID2}_masked_ref.fasta -o ./out_bam2gen/${ID2}_masked_consensus.fasta ./out_bam2gen/${ID2}_masked_calls_normalized.vcf.gz 
 		
 	# add ID to name of consensus
-		sed -i "s/^>/>${ID}_/g" ./out_bam2fasta/${ID2}_masked_consensus.fasta	
+		sed -i "s/^>/>${ID}_/g" ./out_bam2gen/${ID2}_masked_consensus.fasta	
 }
-export -f bam2fasta
+export -f bam2gen
 
 #function to get locus from masked consensus sequences, mito genomes, and NCBI nucleotide records, clean and align
 alignLocusBySample(){
@@ -122,7 +122,7 @@ alignLocusBySample(){
 
 	#get locus from all individuals and align, $POSITIONS determines the locus
 	echo ""; echo `date` EXTRACTING POSITIONS $POSITIONS FOR ALIGNMENT...
-		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 ./out_bam2fasta/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./out_align/${PREFIX}RAD_masked_$LOCUS.fasta
+		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 ./out_bam2gen/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./out_align/${PREFIX}RAD_masked_$LOCUS.fasta
 		
 	#remove individuals with no sequences or all N
 	echo ""; echo `date` REMOVING INDIVIDUALS WITH NO NUCLEOTIDES CALLED...
