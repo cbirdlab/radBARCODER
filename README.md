@@ -95,7 +95,7 @@ GENBANKFASTA=""
 bash radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
-#### 6. Create meta mitochondrial genomes
+#### 6. Make meta mitochondrial genomes
 
 Use `radBARCODER mkMETAGENO` to create a consensus meta mitochondrial genomes for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
 
@@ -123,9 +123,23 @@ bash radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS 
 
 #### 7. Selectively cull your final genome and meta genome alignments to either retain more nucleotides or individuals
 
-Use `radBARCODER cullGENO` to 
+Use `radBARCODER cullGENO` to either maximize the number of nucleotides (`PCT=low`) or number of genomes and meta genomes (`PCT=high`).  All intermediate and final files are saved to same directory as the input file (`FASTA`).
 
-## Installation and Dependencies
+```bash
+# name of file with mitochondrial genome or meta genome alignments
+FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
+
+# keep nucleotides that occur in this percent of genomes and metagenomes in the alignment
+PCT=99
+
+radBARCODER cullGENO $FASTA $PCT
+```
+
+
+
+---
+
+## Detailed Installation and Dependencies
 
 It is up to you how to handle the radBARCODER and dDocentHPC scripts, but here I assume that you will clone fresh copies of the two repos into your project directory and run the scripts directly rather than putting them into your `$PATH`.  Clone the radBARCODER and dDocentHPC repos to your project dir:
 
@@ -221,7 +235,7 @@ install.packages(c("seqinr", "stringr"))
 
 ---
 
-## Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files & a reference mitchondrial genome 
+## Detailed Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files & a reference mitchondrial genome 
 
 Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for processing RAD data in unix-based computers.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
 
@@ -262,7 +276,7 @@ ProjectDir
 
 ---
 
-## Detailed Instructions
+## Detailed Instructions, Including Creation of `bam` Files
 
 If you run into problems with the quick start, then start barcoding your NGS data here.
 
@@ -564,7 +578,7 @@ Sat 05 Sep 2020 01:10:49 AM CDT radBARCODER ALIGN COMPLETED
 
 It is important to check the alignment by eye and edit as necessary or adjust upstream settings. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. In the example data set, which has a lot of missing data, I did not have adjust the alignment at all, but mileage may vary.
 
-#### 5. Lastly you can use `maximizeBP` to selectively cull your alignments from steps 4 or 7, either retaining more loci or more individuals, then goto step 6.
+#### 5. Lastly you can use `cullGENO` to selectively cull your alignments from steps 4 or 7, either retaining more loci or more individuals, then goto step 6.
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
@@ -577,39 +591,39 @@ Update the following variable assignments and run `radBARCODER`:
 ```bash
 FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 PCT=99
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=95
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=90
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=85
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=80
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=75
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=70
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=50
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=30
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=25
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=20
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=15
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=10
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=5
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 PCT=1
-radBARCODER maximizeBP $FASTA $PCT
+radBARCODER cullGENO $FASTA $PCT
 
 ```
 
-Example successful output from 1 run looks like this (while some errors show up here, bute these are ok because they are not related to the `maximizeBP` function or are normal output that I have not suppressed (yet):
+Example successful output from 1 run looks like this (while some errors show up here, bute these are ok because they are not related to the `cullGENO` function or are normal output that I have not suppressed (yet):
 
 ```
 #########################################################################
@@ -618,7 +632,7 @@ Sat 05 Sep 2020 01:19:12 AM CDT RUNNING radBARCODER MAXIMIZEBP...
 
 Sat 05 Sep 2020 01:19:12 AM CDT VARIABLES READ IN:
 
-the function that will be run FUNKTION=......maximizeBP
+the function that will be run FUNKTION=......cullGENO
 the reference genome used to map the reads REF=...........paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 the ls pattern shared by all bam files bamPATTERN=....99
 the number of cpu cores for the task THREADS=.......
