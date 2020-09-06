@@ -104,7 +104,15 @@ alignLocusBySample(){
 		# local name=$7[@]
 		# local IDs=("${!name}")
 	
+	echo ""; echo PREFIX: $PREFIX; echo ""
+	echo ""; echo THREADS: $THREADS; echo ""
+	echo ""; echo midFILE: $midFILE; echo ""
+	echo ""; echo POSITIONS: $POSITIONS; echo ""
+	echo ""; echo LOCUS: $LOCUS; echo ""
+	echo ""; echo mtGenPATTERN: $mtGenPATTERN; echo ""
+	echo ""; echo Long alignment: $LONGALIGNMENT; echo ""
 	echo ""; echo Genbank: $GENBANK; echo ""
+	echo ""; echo REF: $REF; echo ""
 	
 	# make output dir
 	if [ ! -d out_align ]; then
