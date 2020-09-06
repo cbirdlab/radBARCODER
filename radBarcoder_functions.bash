@@ -74,6 +74,7 @@ bam2fasta(){
 		sed -i "s/^>/>${ID}_/g" ${ID2}_masked_consensus.fasta
 	# clean up files
 		mkdir bam2fasta_out
+		mv $ID2.bed bam2fasta_out
 		mv ${ID2}_masked_ref.fasta* bam2fasta_out
 		mv ${ID2}_masked_calls_normalized.vcf.gz* bam2fasta_out
 		mv ${ID2}_masked_calls.vcf.gz* bam2fasta_out
