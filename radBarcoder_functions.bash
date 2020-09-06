@@ -96,7 +96,7 @@ alignLocusBySample(){
 		local midFILE=$3
 		local POSITIONS=$4
 		local LOCUS=$5
-		local mtGenPATTERN="$6"		#cant figure this one out
+		local mtGenPATTERN="$6"	
 		local LONGALIGNMENT=$7
 		local GENBANK=$8
 		local REF=$9
