@@ -20,67 +20,110 @@ sudo cp *R /usr/local/bin
 
 These are the packages used by `radBARCODER`. If you install the newest versions, it will work.  More detailed instructions for installation can be found farther down in this document.
 
-* [`parallel`](https://www.gnu.org/software/parallel/) 
-
-* [`bedtools`](https://github.com/arq5x/bedtools2/releases) 
-
-* [`samtools`](https://www.htslib.org/)  
-
-* [`bcftools`](https://samtools.github.io/bcftools/bcftools.html)
-
-* [`pagan2`](http://wasabiapp.org/software/pagan/) 
-
-* [`mafft`](https://mafft.cbrc.jp/alignment/software/) 
-
-* [`seaview`](http://doua.prabi.fr/software/seaview) 
+* [`parallel`](https://www.gnu.org/software/parallel/), [`bedtools`](https://github.com/arq5x/bedtools2/releases), [`samtools`](https://www.htslib.org/), [`bcftools`](https://samtools.github.io/bcftools/bcftools.html), [`pagan2`](http://wasabiapp.org/software/pagan/), [`mafft`](https://mafft.cbrc.jp/alignment/software/), [`seaview`](http://doua.prabi.fr/software/seaview) 
 
 * [`R`](https://www.r-project.org/)
 
-  * [seqinr](https://cran.r-project.org/web/packages/seqinr/index.html)
-  
-  * [stringr](https://cran.r-project.org/web/packages/stringr/index.html)
+  * [seqinr](https://cran.r-project.org/web/packages/seqinr/index.html), [stringr](https://cran.r-project.org/web/packages/stringr/index.html)
 
 #### 3. Prep your data
 
 All of the following files should be in a single directory:
 
-* mitochondrial genomes
+* *Mitochondrial genomes*
 
-  * the mitochondrial genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file.
+  * The mitochondrial genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file.
 
   * One mitochondrial genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This is the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data.
   
-* locus-specific fasta files
+* *locus-specific fasta files*
 
-  * if you also want to include incomplete mitochondrial sequences in the alignment, you need a single fasta file with as many sequences as you wish.  These sequences do not need to be aligned.
+  * If you also want to include incomplete mitochondrial sequences in the alignment, you need a single fasta file with as many sequences as you wish.  These sequences do not need to be aligned.
 
-* `*bam` files
+* *`*bam` files*
 
   * Your NGS data should be in the form of binary alignment maps ([BAM](https://en.wikipedia.org/wiki/Binary_Alignment_Map)) that have been created using your NGS data and the reference mitochondrial genome. The `bam` file should also be indexed (see [tabix](https://github.com/samtools/tabix)).  1 `bam` and 1 `bam.bai` per individual. The following naming format is assumed: `Population*UniqueID*bam`
   
-* Sample classification files
+* *Sample classification files*
 
   * `radBARCODER` allows you to classify your samples into two groupings, independent of population classification, that will be used to construct consensus metagenomes.  The purpose of these files is to identify sequences as the expected target taxon or the unexpected taxon that showed up in your NGS data.  The files should be text and contain one ID per line, with the ID matching the pattern used in the `bam` files.  For example: `PopID_IndividualID`. Even if you do not have two groups of samples, you still need one file with the names of all the samples and a second file that is empty.  Naming format of the file, itself, is not important.
   
-#### 4. Convert `bam` files to `fasta` files
+#### 4. Convert `bam` files to mitochondrial genome sequences
 
-Use `radBARCODER bam2gen` to convert each of the `bam` files to a mitochondrial genome sequence.
+Use `radBARCODER bam2GENO` to convert each of the `bam` files to a mitochondrial genome sequence.  All intermediate and final files are saved to `./out_bam2GENO`
 
-```
-#Name of reference mtGenome
+```bash
+# Name of reference mtGenome
 REF=reference.Pfalc.mtGenome.fasta  
 
-#Pattern match to the bam files for every individual (do not include a leading wildcard)
+# Pattern match to the bam files for every individual (do not include a leading wildcard)
 bamPATTERN=.Pfalc.mtGenome-RG.bam    
 
-#number of processors to use for parallel operations
-THREADS=8    
+# number of processors to use for parallel operations
+THREADS=32   
 
-radBARCODER bam2gen $REF $bamPATTERN $THREADS
+radBARCODER bam2GENO $REF $bamPATTERN $THREADS
 ```
   
+#### 5. Align the mitochondrial genomes
 
+Use `radBARCODER aliGENO` to align the mitchondrial genome sequences with either `pagan2` (`LONGALIGNMENT=FALSE`) or `mafft` (`LONGALIGNMENT=TRUE`). It pretty easy to modify the alignment method in the `align` function (found in `radBarcoder_functions.bash`). All intermediate and final files are saved to `./out_aliGENO`
 
+```bash
+REF=reference.Pfalc.mtGenome.fasta
+bamPATTERN=.Pfalc.mtGenome-RG.bam
+THREADS=32
+
+# toggle between two alignment methods. FALSE is better than TRUE if it works.
+LONGALIGNMENT=FALSE
+
+# positions to align, refering to reference genome
+POSITIONS=1-18000
+
+# Name of locus or loci, will be included in output file names
+LOCUS="PfalcMitoGenome"
+
+# Name appended to beginning of output file names
+PREFIX=paganAlign_
+
+# Pattern match that returns all mitochondrial genomes from GenBank (use wildcards as necessary)
+mtGenPATTERN="A*Genome.fasta"
+
+# Name of fasta file containing partial mitochondrial sequences from GenBank
+GENBANKFASTA=""
+
+bash radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
+```
+
+#### 6. Create meta mitochondrial genomes
+
+Use `radBARCODER mkMETAGENO` to create a consensus meta mitochondrial genomes for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
+
+```bash
+PREFIX=paganAlign_
+LOCUS="PfalcMitoGenome"
+THREADS=32
+
+# list of sample names from individuals that are divergent from most of your samples to make a meta genome for 
+nontargetIDs=$(cat Pproctozystron.txt)
+nontargetNAME=Ppr
+
+# list of sample names for the majority of your samples that genetically group together to make a meta genome for
+targetIDs=$(cat Pfalcifer.txt)
+targetNAME=Pfa
+
+# a list of codes used to label population identity in the names of the `bam` files.  A meta genome will be made for each population from the individuals in the list of "targetIDs"
+POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
+
+# for each position in the genome alignment, the minimum number of individuals having data that are required to include the consensus nucleotide call
+cvgForCall=1
+
+bash radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+```
+
+#### 7. Selectively cull your final genome and meta genome alignments to either retain more nucleotides or individuals
+
+Use `radBARCODER cullGENO` to 
 
 ## Installation and Dependencies
 
