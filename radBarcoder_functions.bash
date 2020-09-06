@@ -257,7 +257,7 @@ mkMetaMitoGenomes(){
 			local seqNAMES=($(parallel -j $THREADS -k --no-notice "grep '^>' {} | sed 's/>//g' " ::: ${fileNAMES[@]}))
 		#rename the files by sequence name
 			parallel -j $THREADS -k --no-notice --link "mv {1} ./out_metageno/${PREFIX}{2}_masked_aligned_clean_$LOCUS.fasta" ::: ${fileNAMES[@]} ::: ${seqNAMES[@]}
-			parallel -j $THREADS -k --no-notice --link "echo {1} {2}" ::: ${fileNAMES[@]} ::: ${seqNAMES[@]}
+			# parallel -j $THREADS -k --no-notice --link "echo {1} {2}" ::: ${fileNAMES[@]} ::: ${seqNAMES[@]}
 
 	#make consensus sequence from outlier fish
 		parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
@@ -271,7 +271,7 @@ mkMetaMitoGenomes(){
 		ncbiNAMES=($(echo ${seqNAMES[@]} | tr " " "\n" ))
 		for i in ${POPS[@]}; do
 			popIDs=($(echo ${targetIDs[@]} | tr " " "\n" | grep "^$i"))
-			parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta
+			parallel -j $THREADS -k --no-notice "cat ./out_metageno/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./out_metageno/${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta
 			Rscript consensusSeq.R ./out_metageno/${PREFIX}${i}_masked_aligned_clean_$LOCUS.fasta ./out_metageno/${PREFIX}${i}_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
 
 			#get list of NCBI seqs
