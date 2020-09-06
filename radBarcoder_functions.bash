@@ -244,7 +244,7 @@ mkMetaMitoGenomes(){
 		local targetNAME=$9
 		
 	# make output dir
-	if [ ! -d out_align ]; then
+	if [ ! -d out_metageno ]; then
 		mkdir out_metageno
 	fi
 	
