@@ -83,15 +83,7 @@ bam2fasta(){
 		bcftools consensus -s $ID -M 'N' -f ./out_bam2fasta/${ID2}_masked_ref.fasta -o ./out_bam2fasta/${ID2}_masked_consensus.fasta ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz 
 		
 	# add ID to name of consensus
-		sed -i "s/^>/>${ID}_/g" ./out_bam2fasta/${ID2}_masked_consensus.fasta
-		
-	# clean up files
-		# mv $ID2.bed out_bam2fasta
-		#mv ${ID2}_masked_ref.fasta* out_bam2fasta
-		#mv ${ID2}_masked_calls_normalized.vcf.gz* out_bam2fasta
-		#mv ${ID2}_masked_calls.vcf.gz* out_bam2fasta
-		#mv ${ID2}_masked_pile.vcf.gz* out_bam2fasta
-		
+		sed -i "s/^>/>${ID}_/g" ./out_bam2fasta/${ID2}_masked_consensus.fasta	
 }
 export -f bam2fasta
 
@@ -111,26 +103,25 @@ alignLocusBySample(){
 
 		# local name=$7[@]
 		# local IDs=("${!name}")
+		
+	# make output dir
+	if [ ! -d out_align ]; then
+		mkdir out_align
+	fi
 
 	#get locus from all individuals and align, $POSITIONS determines the locus
 	echo ""; echo `date` EXTRACTING POSITIONS $POSITIONS FOR ALIGNMENT...
-		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 out_bam2fasta/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}RAD_masked_$LOCUS.fasta
-		if [ ! -d out_bam2fasta ]; then
-			mkdir out_bam2fasta
-		fi
-		mv *${midFILE}_masked_consensus.fasta out_bam2fasta
+		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 ./out_bam2fasta/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./out_align/${PREFIX}RAD_masked_$LOCUS.fasta
 		
 	#remove individuals with no sequences or all N
 	echo ""; echo `date` REMOVING INDIVIDUALS WITH NO NUCLEOTIDES CALLED...
-		sed 's/^NN*$//g' ${PREFIX}RAD_masked_$LOCUS.fasta | grep -P -B 1 '^[ACTGN@]+$' | grep -v '\-\-' > ${PREFIX}RAD_masked_${LOCUS}_clean.fasta
-	
-	mv ${PREFIX}RAD_masked_$LOCUS.fasta out_align
+		sed 's/^NN*$//g' ./out_align/${PREFIX}RAD_masked_$LOCUS.fasta | grep -P -B 1 '^[ACTGN@]+$' | grep -v '\-\-' > ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta
 	
 	#make fasta from mtGenome sequences
 	if [ ! -z "$mtGenPATTERN" ]; then
 		echo ""; echo `date` GATHERING ALL mtGENOMEs WITH PATTERN=$mtGenPATTERN AND EXTRACTING POSITIONS $POSITIONS
-		ls $mtGenPATTERN | sed 's/.fasta//g' | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}MtGenomes_$LOCUS.fasta
-		LinesInMtGenomes=$(wc -l ${PREFIX}MtGenomes_$LOCUS.fasta | cut -d" " -f1)
+		ls $mtGenPATTERN | sed 's/.fasta//g' | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta
+		LinesInMtGenomes=$(wc -l ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta | cut -d" " -f1)
 	else
 		echo ""; echo `date` NO mtGENOMES SPECIFIED, CONTINUING WITHOUT THEM...
 	fi
@@ -144,7 +135,7 @@ alignLocusBySample(){
 			echo ""; echo `date` NO ADDITIONAL GENBANK SEQUENCES SPECIFIED, CONTINUING WITHOUT THEM...
 		fi
 		echo ""; echo `date` CONCATENATING FASTAs...
-		cat ${PREFIX}MtGenomes_$LOCUS.fasta ${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ${PREFIX}ALL_masked_$LOCUS.fasta
+		cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta
 		
 	# Align all_*.fasta
 	echo ""; echo `date` ALIGNING SEQUENCES WITH $(if [ "$LONGALIGNMENT" == "TRUE" ]; then echo -n MAFFT; else echo -n pagan2; fi)...
@@ -154,7 +145,7 @@ alignLocusBySample(){
 		#mafft --thread $THREADS --ep 0.123 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 		echo ""
 		if [ "$LONGALIGNMENT" == "TRUE" ] || [ "$LONGALIGNMENT" == "T" ]; then
-			mafft --thread $THREADS --globalpair --maxiterate 1000 ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
+			mafft --thread $THREADS --globalpair --maxiterate 1000 ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta > ./out_align/${PREFIX}ALL_masked_aligned_$LOCUS.fasta
 		else
 			# my first try at making this work
 			# pagan2 -s ${PREFIX}ALL_masked_$LOCUS.fasta -o ${PREFIX}ALL_masked_aligned_$LOCUS --threads $THREADS
@@ -170,45 +161,39 @@ alignLocusBySample(){
 
 			# my solution for pagan alignment: align 1 individual at a time to the mulitiple ref genomes
 			echo `date` ALIGNING RAD DATA TO MITOGENOMES...
-			sed 's/N\{20,\}/N/g' ${PREFIX}RAD_masked_${LOCUS}_clean.fasta > ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta
-			mv ${PREFIX}RAD_masked_${LOCUS}_clean.fasta out_align
-			IndivNames=($(cat ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta | paste - - | sed 's/^>//' | cut -f1))
-			IndivSeqs=($(cat ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta | paste - - | sed 's/^>//' | cut -f2))
-			mv ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta out_align
-			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
-			pagan2 -s ${PREFIX}MtGenomes_$LOCUS.fasta -o ref
-			ls PrePaganAligned_*fasta | sed -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ref.fas -r ref.tre -q Pre{}.fasta -o {} --pileup --no-terminal-edges --silent"
-			rm PrePaganAligned_*fasta
-			ls PaganAligned*fas | sed 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta {}.fas {}.fasta FALSE"
-			rm PaganAligned*fas ref.tre ref.fas
-			ls PaganAligned*fasta | parallel --no-notice -j $THREADS "tail -n2 {}" | sed 's/\(.\)>/\1\n>/' > PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{15\}\(----------\)/\1NNNNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{14\}\(----------\)/\1NNNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{13\}\(----------\)/\1NNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{12\}\(----------\)/\1NNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{11\}\(----------\)/\1NNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{10\}\(----------\)/\1NNNNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{9\}\(----------\)/\1NNNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{8\}\(----------\)/\1NNNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{7\}\(----------\)/\1NNNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{6\}\(----------\)/\1NNNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{5\}\(----------\)/\1NNNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{4\}\(----------\)/\1NNNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{3\}\(----------\)/\1NNN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{2\}\(----------\)/\1NN\2/g' PaganAlign_RAD.fasta
-			sed -i 's/\(----------\)[ACTGN]\{1\}\(----------\)/\1N\2/g' PaganAlign_RAD.fasta
-			cat <(cat $(ls PaganAligned*fasta | head -n1) | head -n ${LinesInMtGenomes}) PaganAlign_RAD.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fas
+			sed 's/N\{20,\}/N/g' ./out_align/${PREFIX}ALL_masked_${LOCUS}.fasta > ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta
+			
+			IndivNames=($(cat ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f1))
+			IndivSeqs=($(cat ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f2))
 
-			if [ ! -d out_align ]; then
-				mkdir out_align
-			fi
-			mv PaganAligned*fasta out_align
-
-			mv ${PREFIX}ALL_masked_aligned_$LOCUS.fas ${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
+			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > ./out_align/PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
+			pagan2 -s ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta -o ./out_align/ref
+			ls ./out_align/PrePaganAligned_*fasta | sed -e 's/out_align\///' -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ./out_align/ref.fas -r ./out_align/ref.tre -q ./out_align/Pre{}.fasta -o ./out_align/{} --pileup --no-terminal-edges --silent"
+			
+			ls ./out_align/PaganAligned*fas | sed -e 's/out_align\///' -e 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta ./out_align/{}.fas ./out_align/{}.fasta FALSE"
+			
+			ls ./out_align/PaganAligned*fasta | parallel --no-notice -j $THREADS "tail -n2 {}" | sed 's/\(.\)>/\1\n>/' > ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{15\}\(----------\)/\1NNNNNNNNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{14\}\(----------\)/\1NNNNNNNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{13\}\(----------\)/\1NNNNNNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{12\}\(----------\)/\1NNNNNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{11\}\(----------\)/\1NNNNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{10\}\(----------\)/\1NNNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{9\}\(----------\)/\1NNNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{8\}\(----------\)/\1NNNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{7\}\(----------\)/\1NNNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{6\}\(----------\)/\1NNNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{5\}\(----------\)/\1NNNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{4\}\(----------\)/\1NNNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{3\}\(----------\)/\1NNN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{2\}\(----------\)/\1NN\2/g' ./out_align/PaganAlign_RAD.fasta
+			sed -i 's/\(----------\)[ACTGN]\{1\}\(----------\)/\1N\2/g' ./out_align/PaganAlign_RAD.fasta
+			cat <(cat $(ls ./out_align/PaganAligned*fasta | head -n1) | head -n ${LinesInMtGenomes}) ./out_align/PaganAlign_RAD.fasta > ./out_align/${PREFIX}ALL_masked_aligned_$LOCUS.fasta
+			#mv ./out_align/${PREFIX}ALL_masked_aligned_$LOCUS.fas ./out_align/${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
 		fi
 	echo ""; echo `date` Making sure all individuals have same number of nucleotides plus indels
 		# count up nucleotides
-		FILE=${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
+		FILE=./out_align/${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
 		maxNUC=$(cat $FILE | paste - - | awk -v col=2 'BEGIN{print "count", "lineNum"}{print gsub(/./,"",$col) "\t" NR}' | cut -f1 | sort -n | tail -1)
 		echo "     There are $maxNUC nucleotides in the longest sequence"
 		# save tsv file that quants the missing nucs
@@ -226,14 +211,14 @@ alignLocusBySample(){
 			sed -i "s/^\(.\{$NUC\}\)$/\1$insertSTRING/" $FILE
 		done
 	# clean out sites with all gaps and 'n's, make sure to skip the lines with names
-		sed -e '/>/!s/[nN]/\-/g' ${PREFIX}ALL_masked_aligned_$LOCUS.fasta | \
-		seaview -convert -output_format fasta -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta -del_gap_only_sites -
-		seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.nex ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta
+		sed -e '/>/!s/[nN]/\-/g' ./out_align/${PREFIX}ALL_masked_aligned_$LOCUS.fasta | \
+			seaview -convert -output_format fasta -o ./out_align/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta -del_gap_only_sites -
+		seaview -convert -output_format nexus -o ./out_align/${PREFIX}ALL_masked_aligned_clean_$LOCUS.nex ./out_align/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta
 		
 	# clean up
 		
-		mv ${FILE%.*}.tsv out_align
-		mv ${PREFIX}ALL_masked_aligned_$LOCUS.fasta out_align
+		#mv ${FILE%.*}.tsv out_align
+		#mv ${PREFIX}ALL_masked_aligned_$LOCUS.fasta out_align
 		
 export -f alignLocusBySample
 
