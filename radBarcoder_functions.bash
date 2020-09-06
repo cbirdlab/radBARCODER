@@ -73,12 +73,14 @@ bam2fasta(){
 	# add ID to name of consensus
 		sed -i "s/^>/>${ID}_/g" ${ID2}_masked_consensus.fasta
 	# clean up files
-		mkdir bam2fasta_out
-		mv $ID2.bed bam2fasta_out
-		mv ${ID2}_masked_ref.fasta* bam2fasta_out
-		mv ${ID2}_masked_calls_normalized.vcf.gz* bam2fasta_out
-		mv ${ID2}_masked_calls.vcf.gz* bam2fasta_out
-		mv ${ID2}_masked_pile.vcf.gz* bam2fasta_out
+		if [ ! -d out_bam2fasta ]; then
+			mkdir out_bam2fasta
+		fi
+		mv $ID2.bed out_bam2fasta
+		mv ${ID2}_masked_ref.fasta* out_bam2fasta
+		mv ${ID2}_masked_calls_normalized.vcf.gz* out_bam2fasta
+		mv ${ID2}_masked_calls.vcf.gz* out_bam2fasta
+		mv ${ID2}_masked_pile.vcf.gz* out_bam2fasta
 		
 }
 export -f bam2fasta
@@ -103,12 +105,17 @@ alignLocusBySample(){
 	#get locus from all individuals and align, $POSITIONS determines the locus
 	echo ""; echo `date` EXTRACTING POSITIONS $POSITIONS FOR ALIGNMENT...
 		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ${PREFIX}RAD_masked_$LOCUS.fasta
-		mv *${midFILE}_masked_consensus.fasta bam2fasta_out
+		if [ ! -d out_bam2fasta ]; then
+			mkdir out_bam2fasta
+		fi
+		mv *${midFILE}_masked_consensus.fasta out_bam2fasta
 		
 	#remove individuals with no sequences or all N
 	echo ""; echo `date` REMOVING INDIVIDUALS WITH NO NUCLEOTIDES CALLED...
 		sed 's/^NN*$//g' ${PREFIX}RAD_masked_$LOCUS.fasta | grep -P -B 1 '^[ACTGN@]+$' | grep -v '\-\-' > ${PREFIX}RAD_masked_${LOCUS}_clean.fasta
-
+	
+	mv ${PREFIX}RAD_masked_$LOCUS.fasta out_align
+	
 	#make fasta from mtGenome sequences
 	if [ ! -z "$mtGenPATTERN" ]; then
 		echo ""; echo `date` GATHERING ALL mtGENOMEs WITH PATTERN=$mtGenPATTERN AND EXTRACTING POSITIONS $POSITIONS
@@ -128,7 +135,8 @@ alignLocusBySample(){
 		fi
 		echo ""; echo `date` CONCATENATING FASTAs...
 		cat ${PREFIX}MtGenomes_$LOCUS.fasta ${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ${PREFIX}ALL_masked_$LOCUS.fasta
-	#Align all_*.fasta
+		
+	# Align all_*.fasta
 	echo ""; echo `date` ALIGNING SEQUENCES WITH $(if [ "$LONGALIGNMENT" == "TRUE" ]; then echo -n MAFFT; else echo -n pagan2; fi)...
 		#clustalw -infile=${PREFIX}ALL_masked_$LOCUS.fasta -align -type=DNA -output=NEXUS -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.nex
 		#clustalo -infile=${PREFIX}ALL_masked_$LOCUS.fasta -t DNA --outfmt=fa -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.fasta --threads $THREADS
@@ -153,8 +161,10 @@ alignLocusBySample(){
 			# my solution for pagan alignment: align 1 individual at a time to the mulitiple ref genomes
 			echo `date` ALIGNING RAD DATA TO MITOGENOMES...
 			sed 's/N\{20,\}/N/g' ${PREFIX}RAD_masked_${LOCUS}_clean.fasta > ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta
+			mv ${PREFIX}RAD_masked_${LOCUS}_clean.fasta out_align
 			IndivNames=($(cat ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta | paste - - | sed 's/^>//' | cut -f1))
 			IndivSeqs=($(cat ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta | paste - - | sed 's/^>//' | cut -f2))
+			mv ${PREFIX}RAD_masked_${LOCUS}_clean_2.fasta out_align
 			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
 			pagan2 -s ${PREFIX}MtGenomes_$LOCUS.fasta -o ref
 			ls PrePaganAligned_*fasta | sed -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ref.fas -r ref.tre -q Pre{}.fasta -o {} --pileup --no-terminal-edges --silent"
@@ -179,8 +189,10 @@ alignLocusBySample(){
 			sed -i 's/\(----------\)[ACTGN]\{1\}\(----------\)/\1N\2/g' PaganAlign_RAD.fasta
 			cat <(cat $(ls PaganAligned*fasta | head -n1) | head -n ${LinesInMtGenomes}) PaganAlign_RAD.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fas
 
-			mkdir align_out
-			mv PaganAligned*fasta align_out
+			if [ ! -d out_align ]; then
+				mkdir out_align
+			fi
+			mv PaganAligned*fasta out_align
 
 			mv ${PREFIX}ALL_masked_aligned_$LOCUS.fas ${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
 		fi
@@ -203,11 +215,16 @@ alignLocusBySample(){
 			#echo $insertSTRING
 			sed -i "s/^\(.\{$NUC\}\)$/\1$insertSTRING/" $FILE
 		done
-	#clean out sites with all gaps and 'n's, make sure to skip the lines with names
+	# clean out sites with all gaps and 'n's, make sure to skip the lines with names
 		sed -e '/>/!s/[nN]/\-/g' ${PREFIX}ALL_masked_aligned_$LOCUS.fasta | \
 		seaview -convert -output_format fasta -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta -del_gap_only_sites -
 		seaview -convert -output_format nexus -o ${PREFIX}ALL_masked_aligned_clean_$LOCUS.nex ${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta
-}
+		
+	# clean up
+		
+		mv ${FILE%.*}.tsv out_align
+		mv ${PREFIX}ALL_masked_aligned_$LOCUS.fasta out_align
+		
 export -f alignLocusBySample
 
 #function to make consensus sequences from aligned fasta files
