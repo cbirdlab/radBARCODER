@@ -80,7 +80,7 @@ bam2fasta(){
 		tabix ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz
 		
 	# generate 1 consensus for each fishSample
-		bcftools consensus -s $ID -M 'N' -f ./out_bam2fasta/${ID2}_masked_ref.fasta ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz -o ./out_bam2fasta/${ID2}_masked_consensus.fasta
+		bcftools consensus -s $ID -M 'N' -f ./out_bam2fasta/${ID2}_masked_ref.fasta -o ./out_bam2fasta/${ID2}_masked_consensus.fasta ./out_bam2fasta/${ID2}_masked_calls_normalized.vcf.gz 
 		
 	# add ID to name of consensus
 		sed -i "s/^>/>${ID}_/g" ./out_bam2fasta/${ID2}_masked_consensus.fasta
