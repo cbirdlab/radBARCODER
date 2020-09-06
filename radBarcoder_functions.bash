@@ -151,12 +151,11 @@ alignLocusBySample(){
 	#cat ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta > ./out_align/test2.fasta
 	#cat $GENBANK  > ./out_align/test3.fasta
 
-	cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta
-		
 	# Align all_*.fasta
 	echo ""; echo `date` ALIGNING SEQUENCES WITH $(if [ "$LONGALIGNMENT" == "TRUE" ]; then echo -n MAFFT; else echo -n pagan2; fi)...
 		echo ""
 		if [ "$LONGALIGNMENT" == "TRUE" ] || [ "$LONGALIGNMENT" == "T" ]; then
+			cat ./out_align/${PREFIX}MtGenomes_$LOCUS.fasta ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta
 			#clustalw -infile=${PREFIX}ALL_masked_$LOCUS.fasta -align -type=DNA -output=NEXUS -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.nex
 			#clustalo -infile=${PREFIX}ALL_masked_$LOCUS.fasta -t DNA --outfmt=fa -outfile=${PREFIX}ALL_masked_aligned_$LOCUS.fasta --threads $THREADS
 			#mafft --thread $THREADS ${PREFIX}ALL_masked_$LOCUS.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fasta
@@ -165,6 +164,7 @@ alignLocusBySample(){
 		else
 			# my solution for pagan alignment: align 1 individual at a time to the mulitiple ref genomes
 			echo `date` ALIGNING RAD DATA TO MITOGENOMES...
+			cat ./out_align/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta
 			sed 's/N\{20,\}/N/g' ./out_align/${PREFIX}ALL_masked_$LOCUS.fasta > ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta
 			
 			IndivNames=($(cat ./out_align/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f1))
