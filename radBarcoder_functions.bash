@@ -162,8 +162,6 @@ alignLocusBySample(){
 			ls PaganAligned*fas | sed 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta {}.fas {}.fasta FALSE"
 			rm PaganAligned*fas ref.tre ref.fas
 			ls PaganAligned*fasta | parallel --no-notice -j $THREADS "tail -n2 {}" | sed 's/\(.\)>/\1\n>/' > PaganAlign_RAD.fasta
-			mkdir align_out
-			mv PaganAligned*fasta align_out
 			sed -i 's/\(----------\)[ACTGN]\{15\}\(----------\)/\1NNNNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
 			sed -i 's/\(----------\)[ACTGN]\{14\}\(----------\)/\1NNNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
 			sed -i 's/\(----------\)[ACTGN]\{13\}\(----------\)/\1NNNNNNNNNNNNN\2/g' PaganAlign_RAD.fasta
@@ -180,6 +178,9 @@ alignLocusBySample(){
 			sed -i 's/\(----------\)[ACTGN]\{2\}\(----------\)/\1NN\2/g' PaganAlign_RAD.fasta
 			sed -i 's/\(----------\)[ACTGN]\{1\}\(----------\)/\1N\2/g' PaganAlign_RAD.fasta
 			cat <(cat $(ls PaganAligned*fasta | head -n1) | head -n ${LinesInMtGenomes}) PaganAlign_RAD.fasta > ${PREFIX}ALL_masked_aligned_$LOCUS.fas
+
+			mkdir align_out
+			mv PaganAligned*fasta align_out
 
 			mv ${PREFIX}ALL_masked_aligned_$LOCUS.fas ${PREFIX}ALL_masked_aligned_${LOCUS}.fasta
 		fi
