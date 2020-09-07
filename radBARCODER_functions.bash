@@ -262,11 +262,11 @@ mkMETAGENO(){
 
 	#make consensus sequence from outlier fish
 		parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		consensusSeq.R ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
+		consensusSEQ.R ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish
 		parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${targetIDs[@]} |  sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		consensusSeq.R ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
+		consensusSEQ.R ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish for each sample location
 		ncbiNAMES=($(echo ${seqNAMES[@]} | tr " " "\n" ))
@@ -274,10 +274,10 @@ mkMETAGENO(){
 			popIDs=($(echo ${targetIDs[@]} | tr " " "\n" | grep "^$i"))
 <<<<<<< HEAD
 			parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_clean_$LOCUS.fasta
-			consensusSeq.R ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
+			consensusSEQ.R ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
 =======
 			parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta
-			consensusSeq.R ./${OUTDIR}/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
+			consensusSEQ.R ./${OUTDIR}/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
 >>>>>>> 41aed9c6aec505c42a072823224670e9c922f910
 
 			#get list of NCBI seqs
@@ -302,10 +302,10 @@ mkMETAGENO(){
 }
 
 #function to maximize the number of bp retained at the expense of retaining individuals
-cullGENO(){
+fltrGENOSITES(){
 	#read arguments into variables
 	local INFILE=$1
 	local pctMissCall=$2
-	maximizeBP.R ${INFILE%.*} $pctMissCall
+	fltrGENOSITES.R ${INFILE%.*} $pctMissCall
 	seaview -convert -output_format nexus -o ${INFILE%.*}_$pctMissCall.nex ${INFILE%.*}_$pctMissCall.fasta
 }
