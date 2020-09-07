@@ -649,7 +649,7 @@ Sat 05 Sep 2020 01:10:49 AM CDT radBARCODER ALIGN COMPLETED
 #########################################################################
 ```
 
-The final genome alignments are in the files named `${PREFIX}_ALL_masked_aligned_clean_${LOCUS}.` in the `out_aliGENO` dir, and will be the newest files in the directory (use `ls -ltrh out_aliGENO`) to view. Many intermediate files are also found in the same dir.
+The final genome alignments are in the files named `${PREFIX}_ALL_masked_aligned_clean_${LOCUS}.` in the `out_aliGENO` dir, and will be the newest files in the directory (use `ls -ltrh out_aliGENO`) to view. Many intermediate files are also found in the same dir.  `${PREFIX}` and `${LOCUS}` represent the values save to those variables in the code above.
 
 Updated directory structure:
 
@@ -697,7 +697,7 @@ It is important to check the alignment by eye and edit as necessary or adjust up
 
 If you didn't have much luck extracting the same portions of the mtGenome among individuals in steps 1-6, you can make meta mitochondrial genomes from groups of individuals and align those using `mkMETAGEN` 
 
-This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file.
+This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file. A metagenome will be created for the individuals in each of these files. The two files with the sample names must not contain any of the same individuals.  If there are no "nontarget" individuals, then replace the line below with `nontargetIDs=""`.  
 
 Abbreviated contents of `Pproctozystron.txt`, which contains nontarget taxon that was not expected:
 
@@ -709,8 +709,17 @@ Kr_Ppr009
 Kr_Ppr017
 ```
 
+Abbreviated contents of `Pfalcifer.txt`, which contains nontarget taxon that was not expected:
 
+```
+St_Pfa047
+St_Pfa048
+St_Pfa049
+St_Pfa050
+St_Pfa051
+```
 
+You can also create a meta genome for each population, as long as it is coded into the names of the files. In the example code below, the populations are `At_`, `AtMk_`, `Pk_`, `Kr_`, `St_`. Note the that `_` will prevent individuals in population `AtMk` from being included in `At`.  The `\t` are tab delimiters. Spaces in place of the tabs will probably work also, but no commas should be used. These population identifiers are used to select the individals from the targeted taxon listed in `$targetIDs`. 
 
 `cvgForCall` will determine the minimum read depth required to make a consensus base call. Base calling is performed by `consensusSeq.R` if you want to modify.
 
@@ -736,8 +745,59 @@ cvgForCall=1
 bash radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 ```
 
-Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
+See below for expected output metagenome files. Several other intermediate files will also be save to `out_metaGENO`. `${PREFIX}` and `${LOCUS}` represent the values save to those variables in the code above.
 
+Updated directory structure:
+
+```
+$ tree ../../ProjectDir
+ProjectDir
+ ├──dDocentHPC
+ ├──config.4.all
+ ├──mkBAM
+ │   ├──consensusSEQ.R
+ │   ├──fltrGENOSITES.R
+ │   ├──out_aliGENO
+ ...
+ │   │  ├──${PREFIX}_ALL_masked_aligned_clean_${LOCUS}.fasta
+ │   │  └──${PREFIX}_ALL_masked_aligned_clean_${LOCUS}.nex
+ │   ├──out_bam2GENO
+ ...
+ │   │  ├──pop1_ind1.*.*-RG_masked_*vcf.gz
+ │   │  ├──pop1_ind1.*.*-RG_masked_consensus.fasta
+ ...
+ │   │  └──all.*.*-RG_maksed_consensus.fasta
+ │   ├──out_metaGENO
+ ...
+ │   │  ├──${PREFIX}_ALL_masked_aligned_clean_metageno_${LOCUS}.fasta
+ │   │  ├──${PREFIX}_ALL_masked_aligned_clean_metageno_${LOCUS}.nex
+ │   │  ├──${PREFIX}_NonTargetTaxon_masked_aligned_metageno_${LOCUS}.fasta
+ │   │  ├──${PREFIX}_NonTargetTaxon_masked_aligned_metageno_${LOCUS}.nex
+ │   │  ├──${PREFIX}_pop1-POP_masked_aligned_clean_metageno_${LOCUS}.fasta
+ │   │  ├──${PREFIX}_pop1-POP_masked_aligned_clean_metageno_${LOCUS}.nex
+...
+ │   │  ├──${PREFIX}_POPS_masked_aligned_clean_metageno_${LOCUS}.fasta
+ │   │  ├──${PREFIX}_POPS_masked_aligned_clean_metageno_${LOCUS}.nex
+ │   │  ├──${PREFIX}_TargetTaxon_masked_aligned_metageno_${LOCUS}.fasta
+ │   │  ├──${PREFIX}_TargetTaxon_masked_aligned_metageno_${LOCUS}.nex
+ │   │  ├──${PREFIX}_TAXA_masked_aligned_clean_metageno_${LOCUS}.fasta
+ │   │  └──${PREFIX}_TAXA_masked_aligned_clean_metageno_${LOCUS}.nex
+ │   ├──pop1_ind1.R1.fq.gz
+ │   ├──pop1_ind1.R2.fq.gz
+ ...
+ │   ├──pop1_ind1.*.*-RAW.bam
+ │   ├──pop1_ind1.*.*-RAW.bam.bai
+ │   ├──pop1_ind1.*.*-RG.bam
+ │   ├──pop1_ind1.*.*-RG.bam.bai
+ ...
+ │   ├──radBARCODER
+ │   ├──radBARCODER_functions.bash
+ │   └──reference.*.*.fasta
+ ├──pop1_ind1.F.fq.gz
+ ├──pop1_ind1.R.fq.gz
+ ...
+ └──radBARCODER
+```
 
 
 #### 8. `radBARCODER fltrGENOSITES`  Selectively filter your final genome and meta genome alignments
@@ -751,9 +811,14 @@ Filter genomes with more missing/ambiguous/indel base calls than specified with 
 Update the following variable assignments and run `radBARCODER`:
 
 ```bash
+# path to aligned (meta) genome file
 FASTA=out_aliGENO/paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
+
+# remove (meta) genomes with > `$PCT` missing/ambiguous/indel nucleotide calls.
 PCT=99
+
 radBARCODER fltrGENOSITES $FASTA $PCT
+
 PCT=95
 radBARCODER fltrGENOSITES $FASTA $PCT
 PCT=75
@@ -772,12 +837,12 @@ Example successful output from 1 run looks like this (while some errors show up 
 
 ```
 #########################################################################
-Sat 05 Sep 2020 01:19:12 AM CDT RUNNING radBARCODER MAXIMIZEBP...
+Sat 05 Sep 2020 01:19:12 AM CDT RUNNING radBARCODER fltrGENOSITES...
 #########################################################################
 
 Sat 05 Sep 2020 01:19:12 AM CDT VARIABLES READ IN:
 
-the function that will be run FUNKTION=......cullGENO
+the function that will be run FUNKTION=......fltrGENOSITES
 the reference genome used to map the reads REF=...........paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 the ls pattern shared by all bam files bamPATTERN=....99
 the number of cpu cores for the task THREADS=.......
@@ -788,11 +853,7 @@ the ls pattern shared by all mtGenomes that will be aligned mtGenPATTERN=..
 the aligner that will be used LONGALIGNMENT=.
 the GenBank sequences that should also be aligned GENBANK=.......
 
-ls: cannot access '*99': No such file or directory
-
 Sat 05 Sep 2020 01:19:12 AM CDT 1 SAMPLES BEING PROCESSED:
-
-
 
 Sat 05 Sep 2020 01:19:12 AM CDT Be sure to check the fasta alignment by eye as small errors do occur
 [1] "paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome"
@@ -801,7 +862,7 @@ null device
           1
 
 #########################################################################
-Sat 05 Sep 2020 01:19:13 AM CDT radBARCODER MAXIMIZEBP COMPLETED
+Sat 05 Sep 2020 01:19:13 AM CDT radBARCODER fltrGENOSITES COMPLETED
 #########################################################################
 ```
 
@@ -814,14 +875,26 @@ missingCalls99.pdf
 paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome_99.nex
 ```
 
+You might see an error message referring to `max` and `min` if `PCT` is too large for your data, but the output should still be created.
 
-#### 6. Make network with `PopArt` 
+The output files include a `pdf` with informative figures describing the (meta) genomes, a `csv` with the positions retained by the filter, and `fasta/nexus` files with the aligned (meta) genomes.
+
+
+
+#### 9. Make network with `PopArt` 
 
 [`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.  [Precompiled, but outdated versions of PopArt](http://popart.otago.ac.nz/index.shtml)
 
+The `nex` (meta) genome alignments can be read directly into `popart`.
 
 
+#### 10. Determine the best evolutionary model with [`modeltest-ng`](https://github.com/ddarriba/modeltest)
+
+The `fasta` (meta) genome alignments can be read directly into `modeltest-ng`. If you are reading this, then I figure you might need some help installing `modeltest-ng` because I recall having dependency issues that were not handled in their documentation. If compilation is unsuccessful, search the output for the first error message. Do a web search on the name of the dependency that is missing and you should be on your way.  I was missing `bison` and 'flex`. 
 
 
+#### 11. Reconstruct evolutionary histories
+
+[raxml](https://github.com/stamatak/standard-RAxML) can be used to resconstruct evolutionary histories from the `fasta` formatted (meta) genome alignments.  There are also [web servers](https://raxml-ng.vital-it.ch/#/) that work well.
 
 
