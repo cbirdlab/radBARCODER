@@ -176,9 +176,9 @@ aliGENO(){
 
 			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > ./${OUTDIR}/PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
 			pagan2 -s ./${OUTDIR}/${PREFIX}MtGenomes_$LOCUS.fasta -o ./${OUTDIR}/ref
-			ls ./${OUTDIR}/PrePaganAligned_*fasta | sed -e 's/\.\/${OUTDIR}\///' -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ./${OUTDIR}/ref.fas -r ./${OUTDIR}/ref.tre -q ./${OUTDIR}/Pre{}.fasta -o ./${OUTDIR}/{} --pileup --no-terminal-edges --silent"
+			ls ./${OUTDIR}/PrePaganAligned_*fasta | sed -e "s/\.\/${OUTDIR}\///" -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ./${OUTDIR}/ref.fas -r ./${OUTDIR}/ref.tre -q ./${OUTDIR}/Pre{}.fasta -o ./${OUTDIR}/{} --pileup --no-terminal-edges --silent"
 			
-			ls ./${OUTDIR}/PaganAligned*fas | sed -e 's/\.\/${OUTDIR}\///' -e 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta ./${OUTDIR}/{}.fas ./${OUTDIR}/{}.fasta FALSE"
+			ls ./${OUTDIR}/PaganAligned*fas | sed -e "s/\.\/${OUTDIR}\///" -e 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta ./${OUTDIR}/{}.fas ./${OUTDIR}/{}.fasta FALSE"
 			
 			ls ./${OUTDIR}/PaganAligned*fasta | parallel --no-notice -j $THREADS "tail -n2 {}" | sed 's/\(.\)>/\1\n>/' > ./${OUTDIR}/PaganAlign_RAD.fasta
 			sed -i 's/\(----------\)[ACTGN]\{15\}\(----------\)/\1NNNNNNNNNNNNNNN\2/g' ./${OUTDIR}/PaganAlign_RAD.fasta
