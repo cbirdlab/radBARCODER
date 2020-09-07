@@ -272,8 +272,13 @@ mkMETAGENO(){
 		ncbiNAMES=($(echo ${seqNAMES[@]} | tr " " "\n" ))
 		for i in ${POPS[@]}; do
 			popIDs=($(echo ${targetIDs[@]} | tr " " "\n" | grep "^$i"))
+<<<<<<< HEAD
 			parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_clean_$LOCUS.fasta
 			consensusSeq.R ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
+=======
+			parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta
+			consensusSeq.R ./${OUTDIR}/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
+>>>>>>> 41aed9c6aec505c42a072823224670e9c922f910
 
 			#get list of NCBI seqs
 				ncbiNAMES=($(echo ${ncbiNAMES[@]} | tr " " "\n" | grep -v "$i"))
