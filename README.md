@@ -45,13 +45,13 @@ All of the following files should be in a single directory:
 
 * *`*bam` files*
 
-  * Your NGS data should be in the form of binary alignment maps ([BAM](https://en.wikipedia.org/wiki/Binary_Alignment_Map)) that have been created using your NGS data and the reference mitochondrial genome. The `bam` file should also be indexed (see [tabix](https://github.com/samtools/tabix)).  1 `bam` and 1 `bam.bai` per individual. The following naming format is assumed: `Population*UniqueID*bam`
+  * Your NGS data should be in the form of binary alignment maps ([BAM](https://en.wikipedia.org/wiki/Binary_Alignment_Map)) that have been created using your NGS data and the reference mitochondrial genome. The `bam` file should also be indexed (see [tabix](https://github.com/samtools/tabix)).  1 `bam` and 1 `bam.bai` per individual. The following naming format is assumed: `Population*UniqueID*bam`.  If you want guidance on making the `bam` files, then scroll down to the detailed instructions that begin after the quick start instructions.
   
 * *Sample classification files*
 
   * `radBARCODER` allows you to classify your samples into two groupings, independent of population classification, that will be used to construct consensus metagenomes.  The purpose of these files is to identify sequences as the expected target taxon or the unexpected taxon that showed up in your NGS data.  The files should be text and contain one ID per line, with the ID matching the pattern used in the `bam` files.  For example: `PopID_IndividualID`. Even if you do not have two groups of samples, you still need one file with the names of all the samples and a second file that is empty.  Naming format of the file, itself, is not important.
   
-#### 4. Convert `bam` files to mitochondrial genome sequences
+#### 4. `radBARCODER bam2GENO`: Convert `bam` files to mitochondrial genome sequences
 
 Use `radBARCODER bam2GENO` to convert each of the `bam` files to a mitochondrial genome sequence.  All intermediate and final files are saved to `./out_bam2GENO`
 
@@ -68,7 +68,7 @@ THREADS=32
 radBARCODER bam2GENO $REF $bamPATTERN $THREADS
 ```
   
-#### 5. Align the mitochondrial genomes
+#### 5. `radBARCODER aliGENO`: Align the mitochondrial genomes
 
 Use `radBARCODER aliGENO` to align the mitchondrial genome sequences with either `pagan2` (`LONGALIGNMENT=FALSE`) or `mafft` (`LONGALIGNMENT=TRUE`). It pretty easy to modify the alignment method in the `align` function (found in `radBarcoder_functions.bash`). All intermediate and final files are saved to `./out_aliGENO`
 
@@ -98,7 +98,7 @@ GENBANKFASTA=""
 bash radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
-#### 6. Make meta mitochondrial genomes
+#### 6. `radBARCODER mkMETAGENO`: Make meta mitochondrial genomes
 
 Use `radBARCODER mkMETAGENO` to create a consensus meta mitochondrial genomes for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
 
@@ -124,7 +124,7 @@ cvgForCall=1
 bash radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 ```
 
-#### 7. Selectively filter your final genome and meta genome alignments
+#### 7. `radBARCODER fltrGENOSITES`: Selectively filter your final genome and meta genome alignments
 
 Use `radBARCODER fltrGENOSITES` to filter genomes with more missing/ambiguous/indel base calls than specified with `PCT` then remove sites with missing/ambiguous/indel base calls.  Higher values of `PCT` retain more individuals and lower values retain more nuclotides. The result is a `fasta` alignment with only genomes and sites with A, C, T, or G nucleotide calls.  Output files include the `fasta` alignment, a `pdf` with descriptive plots, and a `csv` describing the reference genome positions retained.  Output files are saved to same directory as the input file (`FASTA`).
 
@@ -146,11 +146,9 @@ Use your favorite software to analyze and visualize the resulting alignments. I 
 
 ---
 
-#####################################################################################
+################################################################################
 
 # DETAILED GUIDANCE
-
-#####################################################################################
 
 If you hit roadblocks in the quick start, more details are given below.  
 
@@ -349,7 +347,7 @@ bash dDocentHPC/dDocentHPC.bash trimFQmap config.4.all
 This will create a dir called `mkBAM` if it does not exist and it is populated with the trimmed `*R[12].fq.gz` files.
 
 
-#### 4. `dDocentHPC mkBAM` and `dDocentHPC fltrBAM`: Map `fastq` to mtDNA Genome then Filter
+#### 4. `dDocentHPC mkBAM` and `dDocentHPC fltrBAM`: Map NGS data to mtDNA Genome then Filter
 
 
 * obtain reference genome from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/)
@@ -389,7 +387,7 @@ bash ../dDocentHPC/dDocentHPC.bash fltrBAM ../config.4.all
 This will create mildly filtered `*RG.bam` files for each individual. These alignment maps are used in downstream processing.  You should view the alignment maps with [IGV](https://software.broadinstitute.org/software/igv/download) or an equivalent `bam` viewer to ensure that mapping and filtering were successful.  Artifacts to look for are reads with too many SNPs (inappropriate alignment score threshold), large insertions at the beginning or ends of reads (adapter and barcode seqs not successfully trimmed), general sloppiness, etc.  If your reads were not originally 151 bp, you will probably need to change the alignment settings in the `config.4.all` file and rerun mapping.
 
 
-#### 5. `radBARCODER bam2GENO` Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2gen`
+#### 5. `radBARCODER bam2GENO` Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage
 
 *Dependencies*: [`parallel`](https://www.gnu.org/software/parallel/) [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`samtools`](https://www.htslib.org/)  [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, all are required by `ddocent`, so you should have these installed if you made it to this step)
 
@@ -877,7 +875,7 @@ paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome_99.nex
 
 You might see an error message referring to `max` and `min` if `PCT` is too large for your data, but the output should still be created.
 
-The output files include a `pdf` with informative figures describing the (meta) genomes, a `csv` with the positions retained by the filter, and `fasta/nexus` files with the aligned (meta) genomes.
+The output files include a `pdf` with informative figures describing the (meta) genomes, a `csv` with the positions retained by the filter, and `fasta/nexus` files with the aligned (meta) genomes.  You can cross reference the positions in the `csv` against the genome annotation to determine the loci retained after filtering.
 
 
 
