@@ -11,9 +11,11 @@ library(stringr)
 commandArgs(TRUE)
 	args <- commandArgs(TRUE)
 	inFile <- paste(args[1],".fasta",sep="")
-	outFile <- paste(args[1],"_",args[2],".fasta", sep="")
+	outFASTA <- paste(args[1],"_",args[2],".fasta", sep="")
+	outCSV <- paste(args[1],"_",args[2],".csv", sep="")
+	outPDF <- paste(args[1],"_",args[2],".pdf", sep="")
 	pctMissCall <- as.numeric(args[2])
-
+	
 # read in data
 alignment <- read.alignment(file = inFile, format = "fasta")
 
@@ -24,7 +26,7 @@ missingCalls_bp <- str_count(alignment$seq,pattern="[-Nn]")
 pctmissingCalls_bp <- 100*str_count(alignment$seq,pattern="[-Nn]")/bp
 
 # output histograms of missing data (nucleotide calls)
-pdf(file=paste("missingCalls_", pctMissCall, ".pdf", sep=""))
+pdf(file=outPDF)
   hist(missingCalls_bp, 
        main="Number Ambiguous/Missing/Indel Nucleotide Calls Per Genome",
        sub = paste("Alignment =", bp, "bp", sep=" "),
@@ -48,7 +50,7 @@ pdf(file=paste("missingCalls_", pctMissCall, ".pdf", sep=""))
   keeperSites <- which(numN == 0)
   keeperSites <- split(keeperSites, cumsum(c(1, diff(keeperSites) != 1)))
   keeperSiteRanges <- lapply(keeperSites, range)
-  write.csv(keeperSiteRanges, file=paste("genomePositionsRemaining_",pctMissCall,".csv", sep=""), row.names=FALSE)
+  write.csv(keeperSiteRanges, file=outCSV, row.names=FALSE)
   bp_remaining <- as.integer(table(numN)[1])
 
   plot(numN,
@@ -67,6 +69,6 @@ pdf(file=paste("missingCalls_", pctMissCall, ".pdf", sep=""))
   keeperSeqNucs <- as.list(apply(keeperNucs, 2, function(x) paste(x,collapse="")))
 
   # save filtered alignment as fasta
-  write.fasta(keeperSeqNucs,keeperSeqNames, file.out = outFile)
+  write.fasta(keeperSeqNucs,keeperSeqNames, file.out = outFASTA)
 
 dev.off()
