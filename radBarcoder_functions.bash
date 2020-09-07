@@ -125,7 +125,7 @@ aliGENO(){
 
 	#get locus from all individuals and align, $POSITIONS determines the locus
 	echo ""; echo `date` EXTRACTING POSITIONS $POSITIONS FOR ALIGNMENT...
-		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 ./out_bam2gen/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./${OUTDIR}/${PREFIX}RAD_masked_$LOCUS.fasta
+		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 ./${INDIR}/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./${OUTDIR}/${PREFIX}RAD_masked_$LOCUS.fasta
 		
 	#remove individuals with no sequences or all N
 	echo ""; echo `date` REMOVING INDIVIDUALS WITH NO NUCLEOTIDES CALLED...
