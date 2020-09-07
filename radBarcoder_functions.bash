@@ -223,7 +223,7 @@ aliGENO(){
 			seaview -convert -output_format fasta -o ./${OUTDIR}/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta -del_gap_only_sites -
 		seaview -convert -output_format nexus -o ./${OUTDIR}/${PREFIX}ALL_masked_aligned_clean_$LOCUS.nex ./${OUTDIR}/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta
 }		
-export -f alignLocusBySample
+export -f aliGENO
 
 #function to make consensus sequences from aligned fasta files
 mkMETAGENO(){
@@ -262,18 +262,18 @@ mkMETAGENO(){
 
 	#make consensus sequence from outlier fish
 		parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${nontargetIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		Rscript consensusSeq.R ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
+		consensusSeq.R ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}NonTargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${nontargetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish
 		parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${targetIDs[@]} |  sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta
-		Rscript consensusSeq.R ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
+		consensusSeq.R ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}TargetTaxon_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${targetNAME}_MetaMtGen
 
 	#make consensus sequence from normal fish for each sample location
 		ncbiNAMES=($(echo ${seqNAMES[@]} | tr " " "\n" ))
 		for i in ${POPS[@]}; do
 			popIDs=($(echo ${targetIDs[@]} | tr " " "\n" | grep "^$i"))
-			parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta
-			Rscript consensusSeq.R ./${OUTDIR}/${PREFIX}${i}-_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
+			parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${popIDs[@]} | sed 's/\(.\)>/\1\n>/' | grep -v '^cat:' | grep -v '^cat:' > ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_clean_$LOCUS.fasta
+			consensusSeq.R ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}${i}-POP_masked_aligned_metageno_$LOCUS.fasta $cvgForCall ${i}_MetaMtGen
 
 			#get list of NCBI seqs
 				ncbiNAMES=($(echo ${ncbiNAMES[@]} | tr " " "\n" | grep -v "$i"))
@@ -283,9 +283,9 @@ mkMETAGENO(){
 		parallel -j $THREADS -k --no-notice "cat ./${OUTDIR}/${PREFIX}{}_masked_aligned_clean_$LOCUS.fasta 2> /dev/null" ::: ${ncbiNAMES[@]} > ./${OUTDIR}/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta
 
 	#concatenate consensus sequences into 1 file
+		cat ./${OUTDIR}/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}*_masked_aligned_metageno_$LOCUS.fasta > ./${OUTDIR}/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 		cat ./${OUTDIR}/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}*Taxon_masked_aligned_metageno_$LOCUS.fasta > ./${OUTDIR}/${PREFIX}TAXA_masked_aligned_metageno_$LOCUS.fasta
 		cat ./${OUTDIR}/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}*POP_masked_aligned_metageno_$LOCUS.fasta > ./${OUTDIR}/${PREFIX}POPS_masked_aligned_metageno_$LOCUS.fasta
-		cat ./${OUTDIR}/${PREFIX}NCBI_masked_aligned_clean_$LOCUS.fasta ./${OUTDIR}/${PREFIX}*_masked_aligned_metageno_$LOCUS.fasta > ./${OUTDIR}/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 	#mafft makes a bunch of sites with all indels due to a few poorly aligned sequences, remove gap only sites
 		seaview -convert -output_format fasta -o ./${OUTDIR}/${PREFIX}ALL_masked_aligned_clean_metageno_$LOCUS.fasta -del_gap_only_sites ./${OUTDIR}/${PREFIX}ALL_masked_aligned_metageno_$LOCUS.fasta
 		seaview -convert -output_format fasta -o ./${OUTDIR}/${PREFIX}TAXA_masked_aligned_clean_metageno_$LOCUS.fasta -del_gap_only_sites ./${OUTDIR}/${PREFIX}TAXA_masked_aligned_metageno_$LOCUS.fasta
@@ -301,6 +301,6 @@ cullGENO(){
 	#read arguments into variables
 	local INFILE=$1
 	local pctMissCall=$2
-	Rscript maximizeBP.R ${INFILE%.*} $pctMissCall
+	maximizeBP.R ${INFILE%.*} $pctMissCall
 	seaview -convert -output_format nexus -o ${INFILE%.*}_$pctMissCall.nex ${INFILE%.*}_$pctMissCall.fasta
 }
