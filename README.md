@@ -14,6 +14,7 @@ git clone https://github.com/cbirdlab/radBARCODER.git
 cd radBARCODER
 sudo cp radB* /usr/local/bin
 sudo cp *R /usr/local/bin
+sudo chmod 777 /usr/local/bin/radBARCODER
 ```
 
 #### 2. Install dependencies
