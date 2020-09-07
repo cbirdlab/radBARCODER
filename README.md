@@ -14,7 +14,9 @@ git clone https://github.com/cbirdlab/radBARCODER.git
 cd radBARCODER
 sudo cp radB* /usr/local/bin
 sudo cp *R /usr/local/bin
-sudo chmod 777 /usr/local/bin/radBARCODER
+sudo chmod 555 /usr/local/bin/radBARCODER
+sudo chmod 555 /usr/local/bin/fltrGENOSITES.R
+sudo chmod 555 /usr/local/bin/consensusSEQ.R
 ```
 
 #### 2. Install dependencies
@@ -122,9 +124,9 @@ cvgForCall=1
 bash radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 ```
 
-#### 7. Selectively cull your final genome and meta genome alignments to either retain more nucleotides or individuals
+#### 7. Selectively filter your final genome and meta genome alignments
 
-Use `radBARCODER cullGENO` to either maximize the number of nucleotides (`PCT=low`) or number of genomes and meta genomes (`PCT=high`).  All intermediate and final files are saved to same directory as the input file (`FASTA`).
+Use `radBARCODER fltrGENOSITES` to filter genomes with more missing/ambiguous/indel base calls than specified with `PCT` then remove sites with missing/ambiguous/indel base calls.  Higher values of `PCT` retain more individuals and lower values retain more nuclotides. The result is a `fasta` alignment with only genomes and sites with A, C, T, or G nucleotide calls.  Output files include the `fasta` alignment, a `pdf` with descriptive plots, and a `csv` describing the reference genome positions retained.  Output files are saved to same directory as the input file (`FASTA`).
 
 ```bash
 # name of file with mitochondrial genome or meta genome alignments
@@ -133,16 +135,35 @@ FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 # keep nucleotides that occur in this percent of genomes and metagenomes in the alignment
 PCT=99
 
-radBARCODER cullGENO $FASTA $PCT
+radBARCODER fltrGENOSITES $FASTA $PCT
 ```
 
+
+#### 8. Evolutionary reconstruction and haplotype networks
+
+Use your favorite software to analyze and visualize the resulting alignments. I tend to use `popart` and `raxml`.
 
 
 ---
 
-## Detailed Installation and Dependencies
+#####################################################################################
 
-It is up to you how to handle the radBARCODER and dDocentHPC scripts, but here I assume that you will clone fresh copies of the two repos into your project directory and run the scripts directly rather than putting them into your `$PATH`.  Clone the radBARCODER and dDocentHPC repos to your project dir:
+# DETAILED GUIDANCE
+
+#####################################################################################
+
+If you hit roadblocks in the quick start, more details are given below.  
+
+We start by assuming that you have untrimmed `fq.gz` NGS files in a project directory, no `bam` files, and go from there.  I do assume that the `fq.gz` files have been demultiplexed but have not been trimmed or filtered.
+
+All bash code assumes that your OS is [Ubunutu](https://ubuntu.com/).  
+
+
+#### 1. Detailed Installation and Dependencies
+
+We will use `dDocentHPC` to trim and map your files to the reference genome prior to using `radBARCODER` to generate mitochondrial genome alignments and metagenomes. Here, I assume that you will clone fresh copies of the `radBARCODER` and `dDocentHPC` repos into your project directory (so we avoid the vagaries of file permissions and the `$PATH`) and run the scripts directly rather than putting them into your `$PATH`.  
+
+Clone the radBARCODER and dDocentHPC repos to your project dir:
 
 ```bash
 # move to your directory for this project. replace "ProjectDir" with the path to the directory for this project
@@ -152,12 +173,16 @@ cd ProjectDir
 git clone https://github.com/cbirdlab/radBARCODER.git   
 git clone https://github.com/cbirdlab/dDocentHPC.git
  
-# set up dir
+# move a few files to the project dir
 cp dDocentHPC/config.4.all .
 mkdir mkBAM
-cp radBARCODER/*bash mkBAM
+cp radBARCODER/radB* mkBAM
 cp radBARCODER/*R mkBAM
 ```
+
+The `config.4.all` file has all the settings for `dDocentHPC` and it is good practice to make a copy of this file in each dir from which it is run to serve as a record of what settings were used.
+
+`radBARCODER` has fewer options and so does not include a config file. I do recommend that you save a bash script describing the settings and commands you ran, but I do not include that in the instructions below.
 
 Assumed directory structure:
 
@@ -167,28 +192,28 @@ ProjectDir
  ├──dDocentHPC
  ├──config.4.all
  ├──mkBAM
- │   ├──consensusSeq.R
- │   ├──cullSeqs.R
- │   ├──maximizeBP.R
+ │   ├──consensusSEQ.R
+ │   ├──fltrGENOSITES.R
  │   ├──radBARCODER
- │   └──radBarcoder_functions.bash
+ │   └──radBARCODER_functions.bash
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
  ...
  └──radBARCODER
 ```
 
-Goto [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. There is a script that automatically installs the software on your unix-based system. dDocentHPC was forked from [dDocent](https://www.ddocent.com) and shares many similarities but the instructions here assume you are using dDocentHPC. You can run dDocentHPC on a workstation or HPC. It is up to you whether you put the `dDocentHPC.bash` script into your `$PATH` or run it directly from the repo.  I usually clone a fresh copy to the top level of a project directory and execute it directly with `bash`.
+Goto [`dDocentHPC`](https://github.com/cbirdlab/dDocentHPC) and find instructions to install all of the required software dependencies and clone the dDocentHPC repository. You will be asked to install [`dDocent`](https://www.ddocent.com, the program from which `dDocentHPC` was forked. There is a script that automatically installs the required software on your unix-based system. `dDocent` shares many similarities with `dDocentHPC` but the instructions here assume you are using `dDocentHPC`. You can run `dDocentHPC` on a workstation or HPC. 
 
-If processing ddRAD libraries that are based on Peterson et al. (2012), I recommend adding 2 adapter sequences to the `trimmomatic` adapters file by overwriting the file `TruSeq3-PE-2.fa` which comes with `trimmomatic` with the modified `TruSeq3-PE-2.fa` file in the `radBARCODER` dir. You may also modify the `TruSeq3-PE-2.fa` file as necessary for your flavor of library prep.
+If processing ddRAD libraries that are based on Peterson et al. (2012), I recommend adding 2 adapter sequences to the `trimmomatic` adapters file by overwriting the file `TruSeq3-PE-2.fa` that comes with `trimmomatic` with the modified `TruSeq3-PE-2.fa` file in the `radBARCODER` dir. You may also modify the `TruSeq3-PE-2.fa` file as necessary for your flavor of library prep.
 
 ```
-# this will work on a workstation. on an HPC, run `dDocentHPC trimFQ` (see below) and view the output to see the path to the adapters file
+# this will work on a workstation. on an HPC, run `dDocentHPC trimFQ` (see below) and view the output to see the path to the adapters file. 
+# If trimmomatic has not been installed in /usr/local/bin, then the path below should be changed accordingly
 cd ProjectDir
 sudo cp radBARCODER/TruSeq3-PE-2.fa /usr/local/bin/adapters
 ```
 
-`radBARCODER` has a few additional dependencies. Unfortunately, there is no installation script for them but it is not difficult.  I provide some commands below which should work but it is up to you to find and update the URLs to the latest versions and make sure that the unzipped tarball dir names match the provided code.
+`radBARCODER` has a few additional dependencies. Unfortunately, there is no installation script for them, but it is not difficult.  I provide some commands below which should work but it is up to you to find and update the URLs to the latest versions and make sure that the unzipped tarball dir names match the provided code.
 
 * [`pagan2`](http://wasabiapp.org/software/pagan/) 
 
@@ -197,6 +222,8 @@ sudo cp radBARCODER/TruSeq3-PE-2.fa /usr/local/bin/adapters
 * [`seaview`](http://doua.prabi.fr/software/seaview) 
 
 * [`R`](https://www.r-project.org/)
+
+  * [seqinr](https://cran.r-project.org/web/packages/seqinr/index.html), [stringr](https://cran.r-project.org/web/packages/stringr/index.html)
 
 ```
 # goto your downloads directory and update your apps (assuming Ubuntu or Debian OS)
@@ -232,26 +259,28 @@ sudo apt -y install r-base
 # run R and install required packages
 R
 install.packages(c("seqinr", "stringr"))
+
+# ctrl-d to exit R
 ```
 
 ---
 
-## Detailed Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files & a reference mitchondrial genome 
+#### 2. Detailed: Preparing your [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format) files & a reference mitchondrial genome 
 
 Follow these steps to make mtGenomes from each individual in your RAD data set.  We use the [dDocentHPC](https://github.com/cbirdlab/dDocentHPC) pipeline for processing RAD data in unix-based computers.  It is assumed that your FASTQ files are minimally processed (demultiplexed with no quality trimming) gzipped and have the following naming convention : 
 
 ```
-# files must end with [FR].fq.gz
+# files must end with F.fq.gz and R.fq.gz
 # only 1 underscore should occur, and it should delimit the population idenity and the individual identity.  
 # every individual must have a different identity
 ProjectDir/Population_UniqueIndividualID.F.fq.gz
 ProjectDir/Population_UniqueIndividualID.R.fq.gz
 ```
 
-It is also assumed that you have a fully assembled mitochondrial genome saved as a [FASTA](https://en.wikipedia.org/wiki/FASTA) file. You should name the reference mtGenome used for mapping sequence reads as follows:
+It is also assumed that you have a fully assembled mitochondrial genome saved as a [FASTA](https://en.wikipedia.org/wiki/FASTA) file.  The file should contain 1 sequence. You should name the reference mtGenome used for mapping sequence reads as follows:
 
 ```
-# no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters.
+# no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters. I recommend species name and and genbank accession number.
 ProjectDir/mkBAM/reference.*.*.fasta
 ```
 
@@ -267,7 +296,7 @@ ProjectDir
  │   ├──cullSeqs.R
  │   ├──maximizeBP.R
  │   ├──radBARCODER
- │   ├──radBarcoder_functions.bash
+ │   ├──radBARCODER_functions.bash
  │   └──reference.*.*.fasta
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
@@ -277,19 +306,15 @@ ProjectDir
 
 ---
 
-## Detailed Instructions, Including Creation of `bam` Files
+#### 3. `dDocentHPC trimFQmap`: Trim `fastq` Files for Mapping
 
-If you run into problems with the quick start, then start barcoding your NGS data here.
-
-#### 1. Trim `fastq` files for mapping: [dDocentHPC trimFQmap](https://github.com/cbirdlab/dDocentHPC)
-
-Before running `dDocentHPC`, you should adjust the settings in the config file `config.4.all` as necessary.  `trimmomatic` is used to complete trimming which will remove low quality base calls, adapters, and reads that are too short after the removal of nucleotides.  The settings that affect reads trimmed for mapping to the mtGenome are labeled in the config as `mkBAM` signifying that these reads will be used to make the BAM files.
+Before running `dDocentHPC`, you should adjust the settings in the config file `config.4.all` as necessary.  `trimmomatic` is used to complete trimming which will remove low quality base calls, adapters, and reads that are too short after the removal of nucleotides.  The settings that affect reads trimmed for mapping to the mtGenome are labeled in the config as `mkBAM` signifying that these reads will be used to make the BAM files. Also, the `radBARCODER` repo has a modified adapter file which adds a ddRAD oligo that can make its way into the beginning of your sequence reads.  See installation section above.
 
 ```bash
 nano config.4.all
 ```
 
-relevant portion of `config.4.all`:
+relevant portion of `config.4.all` assuming ddRAD, 5bp barcodes, and 151 bp PE Illumina sequencing (settings that are `mkREF only` will not be used):
 
 ```
 32              Number of Processors (Auto, 1, 2, 3, ..., n threads) cbirdq=40 normal=20
@@ -311,6 +336,8 @@ no		FixStacks (yes,no)   											Demultiplexing with stacks introduces anomol
 ------------------------------------------------------------------------------------------------------------------
 ```
 
+If your data is not ddRAD with 5bp barcodes or is not 151 bp PE, you should determine the lengths of reads in both your F and R `fq.gz` files and adjust `MINLEN` as you see fit.
+
 Run dDocentHPC to trim the reads as follows:
 
 ```bash
@@ -322,13 +349,17 @@ bash dDocentHPC/dDocentHPC.bash trimFQmap config.4.all
 This will create a dir called `mkBAM` if it does not exist and it is populated with the trimmed `*R[12].fq.gz` files.
 
 
-#### 2. Map `fastq` to mtDNA genome using [dDocentHPC mkBAM](https://github.com/cbirdlab/dDocentHPC)
+#### 4. `dDocentHPC mkBAM` and `dDocentHPC fltrBAM`: Map `fastq` to mtDNA Genome then Filter
 
 
 * obtain reference genome from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/)
+
   * reference genome should be a `fasta` formatted file and can be composed of 1, several, or all loci in the mtGenome
+  
   * as an example, you could name reference genome as follows: `reference.GenusSpecies.GenBankAccession.fasta` 
+  
 * set cutoff in the `config.4.all` file to *_GenusSpecies_*
+
 * set cutoff2 im the `config.4.all` file to *_GenBankAccession_*
 
 Here is an example of the relevant portion of `config.4.all`:
@@ -355,16 +386,16 @@ bash ../dDocentHPC/dDocentHPC.bash mkBAM ../config.4.all
 bash ../dDocentHPC/dDocentHPC.bash fltrBAM ../config.4.all
 ```
 
-This will create mildly filtered `RG.bam` files for each individual. These alignment maps are used in downstream processing.  You should view the alignment maps with [IGV](https://software.broadinstitute.org/software/igv/download) or an equivalent bam viewer to ensure that mapping and filtering were successful.  Artifacts to look for are reads with too many SNPs (inappropriate alignment score threshold), large insertions at the beginning or ends of reads (adapter and barcode seqs not successfully trimmed), etc.  If your reads were not originally 150 bp, you will probably need to change the alignment settings in the `config.4.all` file and rerun mapping.
+This will create mildly filtered `*RG.bam` files for each individual. These alignment maps are used in downstream processing.  You should view the alignment maps with [IGV](https://software.broadinstitute.org/software/igv/download) or an equivalent `bam` viewer to ensure that mapping and filtering were successful.  Artifacts to look for are reads with too many SNPs (inappropriate alignment score threshold), large insertions at the beginning or ends of reads (adapter and barcode seqs not successfully trimmed), general sloppiness, etc.  If your reads were not originally 151 bp, you will probably need to change the alignment settings in the `config.4.all` file and rerun mapping.
 
 
-#### 3. Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2gen`
+#### 5. `radBARCODER bam2GENO` Create consensus sequences for each individual's reads mapped to the reference genome and mask areas with no coverage using `bam2gen`
 
-*Dependencies*: [`parallel`](https://www.gnu.org/software/parallel/) [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`samtools`](https://www.htslib.org/)  [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, all are required by `ddocent`, so you should have these if you made it to this step)
+*Dependencies*: [`parallel`](https://www.gnu.org/software/parallel/) [`bedtools`](https://github.com/arq5x/bedtools2/releases) [`samtools`](https://www.htslib.org/)  [`bcftools`](https://samtools.github.io/bcftools/bcftools.html) (fyi, all are required by `ddocent`, so you should have these installed if you made it to this step)
 
-From here forward, you'll be running the `radBARCODER` scripts.  If you have not already, install required missing dependencies and clone the `radBARCODER` repo into your ProjectDir, and move the `radBARCODER` `*bash` and `*R` scripts to the mkBAM dir (see instructions above).
+From here forward, you'll be running the `radBARCODER` scripts.  If you have not already, install required missing dependencies and clone the `radBARCODER` repo into your ProjectDir, and move the `radBARCODER*` and `*R` scripts to the mkBAM dir (see instructions above).
 
-As a reminder, this is the expected dir structure after completing the previous step (some files and dirs created by trimming and mapping are omitted):
+As a reminder, incontrast to the quick start section, here I describe running the `radBARCODER` scripts in your project directory. If you want to run them from the `$PATH`, you will have to modify the paths in the code blocks in the detailed instruction sections below. This is the expected dir structure after completing the previous step (some files and dirs created by trimming and mapping are omitted):
 
 ```
 $ tree ../ProjectDir
@@ -372,9 +403,8 @@ ProjectDir
  ├──dDocentHPC
  ├──config.4.all
  ├──mkBAM
- │   ├──consensusSeq.R
- │   ├──cullSeqs.R
- │   ├──maximizeBP.R
+ │   ├──consensusSEQ.R
+ │   ├──fltrGENOSITES.R
  │   ├──pop1_ind1.R1.fq.gz
  │   ├──pop1_ind1.R2.fq.gz
  ...
@@ -384,7 +414,7 @@ ProjectDir
  │   ├──pop1_ind1.*.*.-RG.bam.bai
  ...
  │   ├──radBARCODER
- │   ├──radBarcoder_functions.bash
+ │   ├──radBARCODER_functions.bash
  │   └──reference.*.*.fasta
  ├──pop1_ind1.F.fq.gz
  ├──pop1_ind1.R.fq.gz
@@ -395,6 +425,9 @@ ProjectDir
 Update the following variable assignments and run `radBARCODER`:
 
 ```bash
+# move to mkBAM dir.  replace "ProjectDir" as required given you dir structure.
+cd ProjectDir/mkBAM
+
 #Name of reference mtGenome
 REF=reference.Pfalc.mtGenome.fasta  
 
@@ -404,7 +437,7 @@ bamPATTERN=.Pfalc.mtGenome-RG.bam
 #number of processors to use for parallel operations
 THREADS=8    
 
-radBARCODER bam2gen $REF $bamPATTERN $THREADS
+bash radBARCODER bam2GENO $REF $bamPATTERN $THREADS
 ```
 
 Successful output looks like this:
@@ -450,24 +483,63 @@ Sat 05 Sep 2020 12:51:46 AM CDT radBARCODER BAM2GEN COMPLETED
 #########################################################################
 ```
 
-This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual. Note that heterozygous positions are set to default to the reference allele. This behavior can be modified in `radBarcodder_functions.bash` at the line beginning with `bcftools consensus`. 
+This should result in a `vcf.gz` and a `masked_consensus.fasta` for every individual.
 
-Hard coded strigencies are:
+Hard coded stringencies are:
 
 * depth of coverage >= 1
+  * modify by changing `'\t0$'` in `radBARCODER_functions.bash`
+    * example:  `'\t9$'` will mask all positions with < 10 reads
 
 * base call phred quality >= 20
+  * modify `-Q 20` in line beginning with `bcftools mpileup` in `radBARCODER_functions.bash`
 
 * mapping quality >= 30
+  * modify `-q 30` in line beginning with `bcftools mpileup` in `radBARCODER_functions.bash`
+  
+ Note that heterozygous positions are set to default to the reference allele. This behavior can be modified in `radBARCODER_functions.bash` at the line beginning with `bcftools consensus`. 
+
+Updated directory structure:
+
+```
+$ tree ../../ProjectDir
+ProjectDir
+ ├──dDocentHPC
+ ├──config.4.all
+ ├──mkBAM
+ │   ├──consensusSEQ.R
+ │   ├──fltrGENOSITES.R
+ │   ├──out_bam2GENO
+ ...
+ │   │  ├──pop1_ind1.*.*-RG_masked_*vcf.gz
+ │   │  ├──pop1_ind1.*.*-RG_masked_consensus.fasta
+ ...
+ │   │  └──all.*.*-RG_maksed_consensus.fasta
+ │   ├──pop1_ind1.R1.fq.gz
+ │   ├──pop1_ind1.R2.fq.gz
+ ...
+ │   ├──pop1_ind1.*.*-RAW.bam
+ │   ├──pop1_ind1.*.*-RAW.bam.bai
+ │   ├──pop1_ind1.*.*-RG.bam
+ │   ├──pop1_ind1.*.*-RG.bam.bai
+ ...
+ │   ├──radBARCODER
+ │   ├──radBARCODER_functions.bash
+ │   └──reference.*.*.fasta
+ ├──pop1_ind1.F.fq.gz
+ ├──pop1_ind1.R.fq.gz
+ ...
+ └──radBARCODER
+```
 
 
-#### 4. Select a portion of the genomes and `align` it across individuals
+#### 6. `radBARCODER aliGENO`: Select All or a Portion of the Genomes and Align Them Among Individuals
 
 *Dependencies*: [`pagan`](http://wasabiapp.org/software/pagan/) [`mafft`](https://mafft.cbrc.jp/alignment/software/) [`seaview`](http://doua.prabi.fr/software/seaview) 
 
 If you have additional sequences from GenBank that you would like to include with this alignment, you should download them and save into your 'mkBAM' dir. Additional mtGenome sequences should be saves as FASTA files and renamed to have a common format of your choosing. A FASTA file for targeted locus sequences can also be downloaded and included in the alignment.  See the specification of user-defined variables `mtGenPATTERN` and `GENBANKFASTA` below. 
 
-Note that seaview is only used to convert from `fasta` to `nexus` format, so if you don't have it installed, you can manually convert the `fasta` to `nexus`. Also, while the pagan precompiled tar.gz does have mafft, it is not complete and you should use the complete mafft if you are aligning very long sequences, otherwise you will get an error when setting `LONGALIGNMENT=TRUE`
+Note that seaview is only used to convert from `fasta` to `nexus` format, so if you don't have it installed, you can manually convert the `fasta` to `nexus`. Also, while the `pagan2` precompiled `tar.gz` does have `mafft`, it is not complete and you should install the complete `mafft` if you are aligning very long sequences, otherwise you will get an error when setting `LONGALIGNMENT=TRUE`
 
 You can specify which positions to target (for specific loci and genes) to make alignments, including disjunct positions. For example, if you want to specify positions 1-10, then:
 
@@ -483,10 +555,10 @@ POSITIONS=1-4,6-10
 
 Refer to the mtGenomes annotation for the positions of particular loci of interest.
 
-The other issue is which aligner to use.  I've tried `clustalw`, `clustalo`, `mafft`, and `pagan2`.  I've found `pagan2` to be superior in that it almost never needs to be aligned by eye to clean up mistakes.  The default behavior is to run `pagan2` for alignment.  However, if you run into problems, potentially due to sequences being very long, then you can try `mafft` with options set for very long sequences as follows:
+The other issue is which aligner to use.  I have tried `clustalw`, `clustalo`, `mafft`, and `pagan2`.  I've found `pagan2` to be superior in that it almost never needs to be aligned by eye to clean up mistakes.  If it does, you should scrutinize your `bam` files with `IGV` and possibly rerun previous steps with new settings.  The default behavior is to run `pagan2` for alignment.  However, if you run into problems, potentially due to sequences being very long, then you can try `mafft` with options set for very long sequences as follows:
 
 ```bash
-LONGALIGNMENT=TRUE
+LONGALIGNMENT=TRUE   #use mafft instead of pagan2
 ```
 
 Update the following variable assignments and run `radBARCODER`:
@@ -514,7 +586,7 @@ GENBANKFASTA=""
 # specify whether pagan (FALSE) or mafft (TRUE) is used to align.  pagan is better
 LONGALIGNMENT=FALSE
 
-radBARCODER align $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
+radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
 Successful output looks like this:
@@ -577,51 +649,123 @@ Sat 05 Sep 2020 01:10:49 AM CDT radBARCODER ALIGN COMPLETED
 #########################################################################
 ```
 
+The final genome alignments are in the files named `${PREFIX}_ALL_masked_aligned_clean_${LOCUS}.` in the `out_aliGENO` dir, and will be the newest files in the directory (use `ls -ltrh out_aliGENO`) to view. Many intermediate files are also found in the same dir.
+
+Updated directory structure:
+
+```
+$ tree ../../ProjectDir
+ProjectDir
+ ├──dDocentHPC
+ ├──config.4.all
+ ├──mkBAM
+ │   ├──consensusSEQ.R
+ │   ├──fltrGENOSITES.R
+ │   ├──out_aliGENO
+ ...
+ │   │  ├──${PREFIX}_ALL_masked_aligned_clean_${LOCUS}.fasta
+ │   │  └──${PREFIX}_ALL_masked_aligned_clean_${LOCUS}.nex
+ │   ├──out_bam2GENO
+ ...
+ │   │  ├──pop1_ind1.*.*-RG_masked_*vcf.gz
+ │   │  ├──pop1_ind1.*.*-RG_masked_consensus.fasta
+ ...
+ │   │  └──all.*.*-RG_maksed_consensus.fasta
+ │   ├──pop1_ind1.R1.fq.gz
+ │   ├──pop1_ind1.R2.fq.gz
+ ...
+ │   ├──pop1_ind1.*.*-RAW.bam
+ │   ├──pop1_ind1.*.*-RAW.bam.bai
+ │   ├──pop1_ind1.*.*-RG.bam
+ │   ├──pop1_ind1.*.*-RG.bam.bai
+ ...
+ │   ├──radBARCODER
+ │   ├──radBARCODER_functions.bash
+ │   └──reference.*.*.fasta
+ ├──pop1_ind1.F.fq.gz
+ ├──pop1_ind1.R.fq.gz
+ ...
+ └──radBARCODER
+```
+
 It is important to check the alignment by eye and edit as necessary or adjust upstream settings. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. In the example data set, which has a lot of missing data, I did not have adjust the alignment at all, but mileage may vary.
 
-#### 5. Lastly you can use `cullGENO` to selectively cull your alignments from steps 4 or 7, either retaining more loci or more individuals, then goto step 6.
+
+#### 7. `radBARCODER mkMETAGEN` Make Meta-Genomes
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
-This function will call `maximizeBP.R` which is included in the `radBARCODER` repo.  Make sure it is in your working directory
+If you didn't have much luck extracting the same portions of the mtGenome among individuals in steps 1-6, you can make meta mitochondrial genomes from groups of individuals and align those using `mkMETAGEN` 
 
-Set the `PCT` varable between 1 and 99, where it is the amount of allowable missing data. I recommend trying 10,25, and 50 to start with.  Histograms and culled alignments are output.  As the percent missing data goes down, the number of sequences retained also goes down, and the number of bp that are shared across all sequences goes up.
+This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file.
+
+Abbreviated contents of `Pproctozystron.txt`, which contains nontarget taxon that was not expected:
+
+```
+St_Ppr017
+Kr_Ppr002
+Kr_Ppr006
+Kr_Ppr009
+Kr_Ppr017
+```
+
+
+
+
+`cvgForCall` will determine the minimum read depth required to make a consensus base call. Base calling is performed by `consensusSeq.R` if you want to modify.
+
+```bash
+PREFIX=paganAlign_
+LOCUS="PfalcMitoGenome"
+THREADS=32
+
+# list of sample names from individuals that are divergent from most of your samples to make a meta genome for 
+nontargetIDs=$(cat Pproctozystron.txt)
+nontargetNAME=Ppr
+
+# list of sample names for the majority of your samples that genetically group together to make a meta genome for
+targetIDs=$(cat Pfalcifer.txt)
+targetNAME=Pfa
+
+# a list of codes used to label population identity in the names of the `bam` files.  A meta genome will be made for each population from the individuals in the list of "targetIDs"
+POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
+
+# for each position in the genome alignment, the minimum number of individuals having data that are required to include the consensus nucleotide call
+cvgForCall=1
+
+bash radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+```
+
+Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
+
+
+
+#### 8. `radBARCODER fltrGENOSITES`  Selectively filter your final genome and meta genome alignments
+
+*Dependencies*: `R` (`seqinr`, `stringr`) 
+
+This function will call `fltrGENOSITES.R` which is included in the `radBARCODER` repo.  Make sure it is in your `mkBAM` directory
+
+Filter genomes with more missing/ambiguous/indel base calls than specified with `PCT` then remove sites with missing/ambiguous/indel base calls.  Higher values of `PCT` retain more individuals and lower values retain more nuclotides. The result is a `fasta` alignment with only genomes and sites with A, C, T, or G nucleotide calls.  Output files include the `fasta` alignment, a `pdf` with descriptive plots, and a `csv` describing the reference genome positions retained.  Output files are saved to same directory as the input file (`FASTA`).
 
 Update the following variable assignments and run `radBARCODER`:
 
 ```bash
-FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
+FASTA=out_aliGENO/paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 PCT=99
-radBARCODER cullGENO $FASTA $PCT
+radBARCODER fltrGENOSITES $FASTA $PCT
 PCT=95
-radBARCODER cullGENO $FASTA $PCT
-PCT=90
-radBARCODER cullGENO $FASTA $PCT
-PCT=85
-radBARCODER cullGENO $FASTA $PCT
-PCT=80
-radBARCODER cullGENO $FASTA $PCT
+radBARCODER fltrGENOSITES $FASTA $PCT
 PCT=75
-radBARCODER cullGENO $FASTA $PCT
-PCT=70
-radBARCODER cullGENO $FASTA $PCT
+radBARCODER fltrGENOSITES $FASTA $PCT
 PCT=50
-radBARCODER cullGENO $FASTA $PCT
-PCT=30
-radBARCODER cullGENO $FASTA $PCT
+radBARCODER fltrGENOSITES $FASTA $PCT
 PCT=25
-radBARCODER cullGENO $FASTA $PCT
-PCT=20
-radBARCODER cullGENO $FASTA $PCT
-PCT=15
-radBARCODER cullGENO $FASTA $PCT
-PCT=10
-radBARCODER cullGENO $FASTA $PCT
+radBARCODER fltrGENOSITES $FASTA $PCT
 PCT=5
-radBARCODER cullGENO $FASTA $PCT
+radBARCODER fltrGENOSITES $FASTA $PCT
 PCT=1
-radBARCODER cullGENO $FASTA $PCT
-
+radBARCODER fltrGENOSITES $FASTA $PCT
 ```
 
 Example successful output from 1 run looks like this (while some errors show up here, bute these are ok because they are not related to the `cullGENO` function or are normal output that I have not suppressed (yet):
@@ -676,30 +820,6 @@ paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome_99.nex
 [`PopArt`](https://github.com/jessicawleigh/popart-current), or your favorite network program, can now be used to create a network from the file.  `PopArt` automatically removes positions and sequences with poor coverage, so it's very convenient to apply to the file at this point.  [Precompiled, but outdated versions of PopArt](http://popart.otago.ac.nz/index.shtml)
 
 
-#### 7. If you didn't have much luck comparing individuals in steps 1-6, you can make meta mitochondrial genomes from groups of individuals and align those using `mkMETAGEN` and then goto step 6
-
-*Dependencies*: `R` (`seqinr`, `stringr`) 
-
-Not vetted for mass consumption yet
-
-This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file.
-`
-`cvgForCall` will determine the minimum read depth required to make a consensus base call. Base calling is performed by `consensusSeq.R` if you want to modify.
-
-```bash
-PREFIX=paganAlign_
-LOCUS="PfalcMitoGenome"
-THREADS=32
-nontargetIDs=$(cat Pproctozystron.txt)
-nontargetNAME=Ppr
-targetIDs=$(cat Pfalcifer.txt)
-targetNAME=Pfa
-POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
-cvgForCall=1
-radBARCODER mkMETAGEN "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
-```
-
-Intepreting errors: some error feedback is expected.  First, individuals that yielded no useful sequence are removed by `radBARCODER` and if they are listed as individuals from either the targeted or nontargeted taxon, they will trigger an error message, but will not affect the result.  
 
 
 

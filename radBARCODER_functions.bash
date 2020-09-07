@@ -91,7 +91,7 @@ export -f bam2GENO
 #function to get locus from masked consensus sequences, mito genomes, and NCBI nucleotide records, clean and align
 aliGENO(){
 
-	#assign arguments to variables
+	# assign arguments to variables
 		local PREFIX=$1
 		local THREADS=$2
 		local midFILE=$3
