@@ -888,11 +888,22 @@ The `nex` (meta) genome alignments can be read directly into `popart`.
 
 #### 10. Determine the best evolutionary model with [`modeltest-ng`](https://github.com/ddarriba/modeltest)
 
-The `fasta` (meta) genome alignments can be read directly into `modeltest-ng`. If you are reading this, then I figure you might need some help installing `modeltest-ng` because I recall having dependency issues that were not handled in their documentation. If compilation is unsuccessful, search the output for the first error message. Do a web search on the name of the dependency that is missing and you should be on your way.  I was missing `bison` and 'flex`. 
+The `fasta` (meta) genome alignments can be read directly into `modeltest-ng`. If you are reading this, then I figure you might need some help installing `modeltest-ng` because I recall having dependency issues that were not handled in their documentation. 
+
+if you install `modeltest-ng`, make sure you have the following dependencies:
+
+```bash
+sudo apt-get install flex bison libgmp3-dev
+```
 
 
 #### 11. Reconstruct evolutionary histories
 
-[raxml](https://github.com/stamatak/standard-RAxML) can be used to resconstruct evolutionary histories from the `fasta` formatted (meta) genome alignments.  There are also [web servers](https://raxml-ng.vital-it.ch/#/) that work well.
+[raxml](https://github.com/amkozlov/raxml-ng) can be used to resconstruct evolutionary histories from the `fasta` formatted (meta) genome alignments.  There are also [web servers](https://raxml-ng.vital-it.ch/#/) that work well for small data sets that do not require large amounts of bootstraps.
 
+if you install `raxml`, make sure you have the following dependencies:
+
+```bash
+sudo apt-get install flex bison libgmp3-dev
+```
 
