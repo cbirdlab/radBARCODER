@@ -95,7 +95,7 @@ mtGenPATTERN="A*Genome.fasta"
 # Name of fasta file containing partial mitochondrial sequences from GenBank
 GENBANKFASTA=""
 
-bash radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
+radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
 #### 6. `radBARCODER mkMETAGENO`: Make meta mitochondrial genomes
@@ -121,7 +121,7 @@ POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
 # for each position in the genome alignment, the minimum number of individuals having data that are required to include the consensus nucleotide call
 cvgForCall=1
 
-bash radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
+radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THREADS $cvgForCall $nontargetNAME $targetNAME
 ```
 
 #### 7. `radBARCODER fltrGENOSITES`: Selectively filter your final genome and meta genome alignments

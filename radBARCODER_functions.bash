@@ -136,6 +136,7 @@ aliGENO(){
 		echo ""; echo `date` GATHERING ALL mtGENOMEs WITH PATTERN=$mtGenPATTERN AND EXTRACTING POSITIONS $POSITIONS
 		ls $mtGenPATTERN | sed 's/.fasta//g' | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 {}.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./${OUTDIR}/${PREFIX}MtGenomes_$LOCUS.fasta
 		LinesInMtGenomes=$(wc -l ./${OUTDIR}/${PREFIX}MtGenomes_$LOCUS.fasta | cut -d" " -f1)
+		NumMtGenomes=$(grep -c "^>" ./${OUTDIR}/${PREFIX}MtGenomes_$LOCUS.fasta)
 	else
 		echo ""; echo `date` NO mtGENOMES SPECIFIED, CONTINUING WITHOUT THEM...
 	fi
@@ -170,13 +171,26 @@ aliGENO(){
 			cat ./${OUTDIR}/${PREFIX}RAD_masked_${LOCUS}_clean.fasta $GENBANK  > ./${OUTDIR}/${PREFIX}ALL_masked_$LOCUS.fasta
 			sed 's/N\{20,\}/N/g' ./${OUTDIR}/${PREFIX}ALL_masked_$LOCUS.fasta > ./${OUTDIR}/${PREFIX}ALL_masked_${LOCUS}_clean.fasta
 			
-			IndivNames=($(cat ./${OUTDIR}/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f1))
-			echo ""; echo Print IndivNames:; echo ${IndivNames[@]}; echo ""
-			IndivSeqs=($(cat ./${OUTDIR}/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f2))
+			# causes error in the next parallel command if there are too many samples
+			#IndivNames=($(cat ./${OUTDIR}/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f1))
+			#echo ""; echo Print IndivNames:; echo ${IndivNames[@]}; echo ""
+			#IndivSeqs=($(cat ./${OUTDIR}/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f2))
 
-			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > ./${OUTDIR}/PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
+			#solution to error
+			cat ./${OUTDIR}/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f1 > ./${OUTDIR}/IndivNames.txt
+			cat ./${OUTDIR}/${PREFIX}ALL_masked_${LOCUS}_clean.fasta | paste - - | sed 's/^>//' | cut -f2 > ./${OUTDIR}/IndivSeqs.txt
+			
+			# parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > ./${OUTDIR}/PrePaganAligned_{1}.fasta " ::: ${IndivNames[@]} ::: ${IndivSeqs[@]}
+			parallel --no-notice --link -j $THREADS "printf '>{1}\n{2}\n' > ./${OUTDIR}/PrePaganAligned_{1}.fasta " :::: ./${OUTDIR}/IndivNames.txt :::: ./${OUTDIR}/IndivSeqs.txt
+			
+			# error with 1 ref genome
 			pagan2 -s ./${OUTDIR}/${PREFIX}MtGenomes_$LOCUS.fasta -o ./${OUTDIR}/ref
-			ls ./${OUTDIR}/PrePaganAligned_*fasta | sed -e "s/\.\/${OUTDIR}\///" -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ./${OUTDIR}/ref.fas -r ./${OUTDIR}/ref.tre -q ./${OUTDIR}/Pre{}.fasta -o ./${OUTDIR}/{} --pileup --no-terminal-edges --silent"
+			
+			if [ $NumMtGenomes -eq 1 ]; then
+				cat ./${OUTDIR}/${PREFIX}MtGenomes_$LOCUS.fasta > ./${OUTDIR}/ref.fas
+			fi
+			
+			ls ./${OUTDIR}/PrePaganAligned_*fasta | sed -e "s/\.\/${OUTDIR}\///" -e 's/Pre//' -e 's/\.fasta//' | parallel --no-notice -j $THREADS "pagan2 -a ./${OUTDIR}/ref.fas -r ./${OUTDIR}/ref.tre -q ./${OUTDIR}/Pre{}.fasta -o ./${OUTDIR}/{} --pileup-alignment --no-terminal-edges --silent"
 			
 			ls ./${OUTDIR}/PaganAligned*fas | sed -e "s/\.\/${OUTDIR}\///" -e 's/\.fas//' | parallel --no-notice -j $THREADS "ntrlvdFasta2Fasta ./${OUTDIR}/{}.fas ./${OUTDIR}/{}.fasta FALSE"
 			
@@ -208,16 +222,27 @@ aliGENO(){
 		paste <(cat $FILE | paste - - | awk -v col=2 'BEGIN{print "count", "lineNum"}{print gsub(/./,"",$col) "\t" NR}' | tail -n+2 | cut -f1) <(cat $FILE | paste - -) > ${FILE%.*}.tsv
 
 		# make array of uniq numbers of missing deletions at the end of the sequences in the fasta file
-		fixSEQ=($(awk -v x=$maxNUC '{ if ($1 < x) { print x-$1 }}' ${FILE%.*}.tsv | sort -n | uniq))
+		# this is slow
+		#fixSEQ=($(awk -v x=$maxNUC '{ if ($1 < x) { print x-$1 }}' ${FILE%.*}.tsv | sort -n | uniq))
 		# use sed to add - to ends of lines
-		for i in ${fixSEQ[@]}; do
-			echo "     $i indels being added to short sequences"
-			NUC=$(($maxNUC - $i))
-			insertSTRING=$(printf '%.0s-' $(seq 1 $i))
+		#for i in ${fixSEQ[@]}; do
+		#	echo "     $i indels being added to short sequences"
+		#	NUC=$(($maxNUC - $i))
+		#	insertSTRING=$(printf '%.0s-' $(seq 1 $i))
+		#	#echo $NUC
+		#	#echo $insertSTRING
+		#	sed -i "s/^\(.\{$NUC\}\)$/\1$insertSTRING/" $FILE
+		#done
+		# alternative sed that should be faster
+		fixSEQ=($(awk -v x=$maxNUC '{ if ($1 < x) { print x-$1 }}' ${FILE%.*}.tsv ))
+		for i in ${!fixSEQ[@]}; do
+			echo "     ${fixSEQ[$i]} indels being added to short sequences"
+			insertSTRING=$(printf '%.0s-' $(seq 1 ${fixSEQ[$i]}))
 			#echo $NUC
 			#echo $insertSTRING
-			sed -i "s/^\(.\{$NUC\}\)$/\1$insertSTRING/" $FILE
+			sed -i "$i s/$/$insertSTRING/" $FILE
 		done
+
 	# clean out sites with all gaps and 'n's, make sure to skip the lines with names
 		sed -e '/>/!s/[nN]/\-/g' ./${OUTDIR}/${PREFIX}ALL_masked_aligned_$LOCUS.fasta | \
 			seaview -convert -output_format fasta -o ./${OUTDIR}/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta -del_gap_only_sites -
