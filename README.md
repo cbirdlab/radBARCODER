@@ -154,7 +154,7 @@ If you hit roadblocks in the quick start, more details are given below.
 
 We start by assuming that you have untrimmed `fq.gz` NGS files in a project directory, no `bam` files, and go from there.  I do assume that the `fq.gz` files have been demultiplexed but have not been trimmed or filtered.
 
-All bash code assumes that your OS is [Ubunutu](https://ubuntu.com/).  
+All bash code assumes that your OS is [Ubuntu](https://ubuntu.com/).  
 
 
 #### 1. Detailed Installation and Dependencies
