@@ -2,13 +2,13 @@
 
 scripts to extract, align, and type mtDNA data from restriction site associated DNA sequenced on an [Illumina Machine](https://en.wikipedia.org/wiki/Illumina,_Inc.) with mitochondrial reference genomes of non-model species on linux/unix computers
 
-* radBARCODER bam2GENO
+* `radBARCODER bam2GENO`
 
-* radBARCODER aliGENO
+* `radBARCODER aliGENO`
 
-* radBARCODER mkMETAGENO
+* `radBARCODER mkMETAGENO`
 
-* radBARCODER fltrGENOSITES
+* `radBARCODER fltrGENOSITES`
 
 ---
 
