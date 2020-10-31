@@ -25,8 +25,8 @@ chkNTRLVD(){
 	local INFILE=$1
 	local numLines=$(wc -l $INFILE | tr -s ' ' '\t' | cut -f1)
 	local numSeqs=$(grep -c '^>' $INFILE)
-	local remainder=$(($numLines % $numSeqs))
-	if [ $remainder -gt 0 ]; then
+	local numLinesPerSeq=$(echo "$numLines / $numSeqs" | bc)
+	if [ $(bc -l <<< "$numLinesPerSeq > 2") -eq 1 ]; then
 		echo TRUE
 	fi
 }
@@ -50,9 +50,10 @@ chkSeqNAMES(){
 }
 export -f chkSeqNAMES
 
+
 # function to convert an interleaved fasta to a normal fasta
 ntrlvdFasta2Fasta(){
-	if read -t 0; then
+	if [ ! -z "$3" ] ; then
 		local INFILE=$1
 		local OUTFILE=$2
 		local SORT=$3
@@ -175,6 +176,8 @@ aliGENO(){
 	# Fix GENBANKFASTA file
 	if [ ! -z "$GENBANK" ]; then
 		echo ""; echo `date` ADDING $GENBANK SEQUENCES FROM GENBANK...
+		#remove carriage returns
+		sed -i 's/\r//g' $GENBANK
 		if [ "$(chkNTRLVD $GENBANK)" == "TRUE" ]; then
 			echo ""; echo `date` $GENBANK IS INTERLEAVED FASTA, CREATING SEQUENTIAL FASTA...
 				local sqntlGENBANK=${GENBANK%.*}_sqntl.${GENBANK##*.}
@@ -288,7 +291,7 @@ aliGENO(){
 		# alternative sed that should be faster
 		fixSEQ=($(awk -v x=$maxNUC '{ if ($1 < x) { print x-$1 }}' ${FILE%.*}.tsv ))
 		for i in ${!fixSEQ[@]}; do
-			echo "     ${fixSEQ[$i]} indels being added to short sequences"
+			# echo "     ${fixSEQ[$i]} indels being added to short sequences"
 			insertSTRING=$(printf '%.0s-' $(seq 1 ${fixSEQ[$i]}))
 			#echo $NUC
 			#echo $insertSTRING
