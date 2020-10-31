@@ -85,10 +85,11 @@ bam2GENO(){
 		
 	# make output dir	
 		local OUTDIR=out_bam2GENO
-		if [ ! -d $OUTDIR ]; then
-			mkdir ${OUTDIR}
+		if [ -d $OUTDIR ]; then
+			echo ""; echo `date` $OUTDIR EXISTS, REMOVING CONTENTS FROM PREVIOUS RUN...
+			rm -rf ${OUTDIR}
 		fi
-		
+		mkdir ${OUTDIR}
 	# calculate coverage at each base from bam file and return a bed file with positions that have no coverage
 		bedtools genomecov -ibam $ID2.bam -bga | grep -P '\t0$' > ./${OUTDIR}/$ID2.bed
 		
@@ -148,9 +149,11 @@ aliGENO(){
 		INDIR=.
 	fi
 	OUTDIR=out_aliGENO
-	if [ ! -d ${OUTDIR} ]; then
-		mkdir ${OUTDIR}
+	if [ -d ${OUTDIR} ]; then
+		echo ""; echo `date` $OUTDIR EXISTS, REMOVING CONTENTS FROM PREVIOUS RUN...
+		rm -rf ${OUTDIR}
 	fi
+	mkdir ${OUTDIR}
 
 	#get locus from all individuals and align, $POSITIONS determines the locus
 	echo ""; echo `date` EXTRACTING POSITIONS $POSITIONS FOR ALIGNMENT...
