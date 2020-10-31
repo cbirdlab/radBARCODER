@@ -20,30 +20,55 @@ catFILE1=cat${CUTOFFS}-FLTR_F4.bam
 bamLIST2=bamlist${CUTOFFS}.list2
 catFILE2=cat${CUTOFFS}-FLTR_F$FILTER.bam
 
+# function to determine if fasta file is interleaved
+chkNTRLVD(){
+	local INFILE=$1
+	local numLines=$(wc -l $INFILE | tr -s ' ' '\t' | cut -f1)
+	local numSeqs=$(grep -c '^>' $INFILE)
+	local remainder=$(($numLines % $numSeqs))
+	if [ $remainder -gt 0 ]; then
+		echo TRUE
+	fi
+}
+export -f chkNTRLVD
 
-#
+chkINDELS(){
+	local INFILE=$1
+	local indelLines=$(grep -v '^>' $INFILE | grep -c '-')
+	if [ $indelLines -gt 0 ]; then
+		echo TRUE
+	fi
+}
+export -f chkINDELS
+
+chkSeqNAMES(){
+	local INFILE=$1
+	local numOffendingSeqNames=$(grep '^>' $INFILE | grep -c '[ |]')
+	if [ $numOffendingSeqNames -gt 0 ]; then
+		echo TRUE
+	fi
+}
+export -f chkSeqNAMES
+
+# function to convert an interleaved fasta to a normal fasta
 ntrlvdFasta2Fasta(){
-	#convert an interleaved fasta to a normal fasta
 	if read -t 0; then
-	INFILE=$1
-	OUTFILE=$2
-	SORT=$3
-	if [ "$SORT" == "TRUE" ]; then
-		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | sort | tr "\t" "\n" > $OUTFILE
+		local INFILE=$1
+		local OUTFILE=$2
+		local SORT=$3
+		if [ "$SORT" == "TRUE" ]; then
+			cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | sort | tr "\t" "\n" > $OUTFILE
+		else
+			cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | tr "\t" "\n" > $OUTFILE
+		fi
 	else
-		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | tr "\t" "\n" > $OUTFILE
-	fi
-
-	else
-
-	INFILE=/dev/stdin
-	SORT=$1
-	if [ "$SORT" == "TRUE" ]; then
-		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | sort | tr "\t" "\n"
-	else
-		cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | tr "\t" "\n"
-	fi
-
+		local INFILE=/dev/stdin
+		local SORT=$1
+		if [ "$SORT" == "TRUE" ]; then
+			cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | sort | tr "\t" "\n"
+		else
+			cat $INFILE | tr -d "\r" | sed 's/\(^>.*\)$/\1\t/' | tr -d "\n" | sed -e $'s/>/\\n>/g' | tail -n+2 | tr "\t" "\n"
+		fi
 	fi
 }
 export -f ntrlvdFasta2Fasta
@@ -53,13 +78,12 @@ export -f ntrlvdFasta2Fasta
 	# superior to using a single unmasked reference genome
 	# designed to be run in parallel
 bam2GENO(){
-	# assign arguments to variables
 		local ID=$1							#*_Pfa*
 		local ID2=$1$2						#*_Pfa*$CUTOFFS-FLTR_F4
 		local REF=$3						#unmasked reference genome
 		
 	# make output dir	
-		OUTDIR=out_bam2GENO
+		local OUTDIR=out_bam2GENO
 		if [ ! -d $OUTDIR ]; then
 			mkdir ${OUTDIR}
 		fi
@@ -116,8 +140,12 @@ aliGENO(){
 	echo Genbank: $GENBANK
 	echo REF: $REF; echo ""
 	
-	# make output dir
-	INDIR=out_bam2GENO
+	# set input and make output dir
+	if [ -d out_bam2GENO ]; then
+		INDIR=out_bam2GENO
+	else
+		INDIR=.
+	fi
 	OUTDIR=out_aliGENO
 	if [ ! -d ${OUTDIR} ]; then
 		mkdir ${OUTDIR}
@@ -125,7 +153,7 @@ aliGENO(){
 
 	#get locus from all individuals and align, $POSITIONS determines the locus
 	echo ""; echo `date` EXTRACTING POSITIONS $POSITIONS FOR ALIGNMENT...
-		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 ./${INDIR}/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./${OUTDIR}/${PREFIX}RAD_masked_$LOCUS.fasta
+		echo ${IDs[@]} | tr " " "\n" | parallel -j $THREADS -k --no-notice "echo \>{} && tail -n +2 ${INDIR}/{}${midFILE}_masked_consensus.fasta | tr '\n' '\t' | sed 's/\t//g' | sed 's/ */\t/g' | cut -f $POSITIONS | sed 's/\t//g' " > ./${OUTDIR}/${PREFIX}RAD_masked_$LOCUS.fasta
 		
 	#remove individuals with no sequences or all N
 	echo ""; echo `date` REMOVING INDIVIDUALS WITH NO NUCLEOTIDES CALLED...
@@ -144,12 +172,36 @@ aliGENO(){
 		#need to code, right now, just download as 1 big fasta
 
 	#Combine fastas, make sure to add genbank nucleotide recs as neccessary
+	# Fix GENBANKFASTA file
 	if [ ! -z "$GENBANK" ]; then
 		echo ""; echo `date` ADDING $GENBANK SEQUENCES FROM GENBANK...
+		if [ "$(chkNTRLVD $GENBANK)" == "TRUE" ]; then
+			echo ""; echo `date` $GENBANK IS INTERLEAVED FASTA, CREATING SEQUENTIAL FASTA...
+				local sqntlGENBANK=${GENBANK%.*}_sqntl.${GENBANK##*.}
+				ntrlvdFasta2Fasta $GENBANK $sqntlGENBANK FALSE
+				GENBANK=$sqntlGENBANK
+		fi
+		if [ "$(chkINDELS $GENBANK)" == "TRUE" ]; then
+			echo ""; echo `date` $GENBANK HAS INDELS, REMOVING INDELS...
+				local noindelGENBANK=${GENBANK%.*}_noIndel.${GENBANK##*.}
+				paste <(cat $GENBANK | paste - - | cut -f1) \
+					<(cat $GENBANK | paste - - | cut -f2 | sed 's/-//g') | \
+					tr '\t' '\n' > $noindelGENBANK
+				GENBANK=$noindelGENBANK
+		fi
+		if [ "$(chkSeqNAMES $GENBANK)" == "TRUE" ]; then
+			echo ""; echo      `date` $GENBANK HAS SEQUENCE NAMES WITH \| AND SPACES, RENAMING SEQUENCES...
+				local cleanedGENBANK=${GENBANK%.*}_cleaned.${GENBANK##*.}
+				paste <(cat $GENBANK | paste - - | cut -f1 | sed -e 's/|.*$//' -e 's/ .*$//') \
+					<(cat $GENBANK | paste - - | cut -f2) | \
+					tr '\t' '\n' > $cleanedGENBANK
+				GENBANK=$cleanedGENBANK
+		fi
 	else
 		echo ""; echo `date` NO ADDITIONAL GENBANK SEQUENCES SPECIFIED, CONTINUING WITHOUT THEM...
 	fi
-	echo ""; echo `date` CONCATENATING FASTAs...
+	
+	#echo ""; echo `date` CONCATENATING FASTAs...
 	
 	#cat ./${OUTDIR}/${PREFIX}MtGenomes_$LOCUS.fasta > ./${OUTDIR}/test1.fasta
 	#cat ./${OUTDIR}/${PREFIX}RAD_masked_${LOCUS}_clean.fasta > ./${OUTDIR}/test2.fasta
@@ -268,6 +320,12 @@ mkMETAGENO(){
 		
 	# make output dir
 	INDIR=out_aliGENO
+	if [ -f out_aliGENO ]; then
+		INDIR=out_aliGENO
+	else
+		INDIR=.
+	fi
+
 	OUTDIR=out_metaGENO
 	if [ -d ${OUTDIR} ]; then
 		rm -rf ${OUTDIR}
@@ -276,7 +334,7 @@ mkMETAGENO(){
 	
 	#split up fasta for making consensus seqs and name files according to seq id
 		#split up fasta by sequence and make list of file names
-			csplit --quiet --digits=4 --prefix=split${PREFIX}_masked_aligned_clean_$LOCUS.fasta ./${INDIR}/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta "/^>/+0" "{*}"
+			csplit --quiet --digits=4 --prefix=split${PREFIX}_masked_aligned_clean_$LOCUS.fasta ${INDIR}/${PREFIX}ALL_masked_aligned_clean_$LOCUS.fasta "/^>/+0" "{*}"
 			rm split${PREFIX}_masked_aligned_clean_$LOCUS.fasta0000
 			mv split${PREFIX}_masked_aligned_clean_$LOCUS.fasta* ${OUTDIR}
 			local fileNAMES=($(ls ./${OUTDIR}/split${PREFIX}_masked_aligned_clean_$LOCUS.fasta*))
