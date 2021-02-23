@@ -64,10 +64,10 @@ All of the following files should be in a single directory:
 Use `radBARCODER bam2GENO` to convert each of the `bam` files to a mitochondrial genome sequence.  All intermediate and final files are saved to `./out_bam2GENO`
 
 ```bash
-# Name of reference mtGenome
+# Name of reference mtGenome that you mapped your NGS reads to
 REF=reference.Pfalc.mtGenome.fasta  
 
-# Pattern match to the bam files for every individual (do not include a leading wildcard)
+# String pattern match to the bam files for every individual (do not include a leading wildcard). Use same pattern match conventions as you would with `ls`
 bamPATTERN=.Pfalc.mtGenome-RG.bam    
 
 # number of processors to use for parallel operations
@@ -85,7 +85,7 @@ REF=reference.Pfalc.mtGenome.fasta
 bamPATTERN=.Pfalc.mtGenome-RG.bam
 THREADS=32
 
-# toggle between two alignment methods. FALSE is better than TRUE if it works.
+# toggle between two alignment methods. FALSE is "better" than TRUE if it works.
 LONGALIGNMENT=FALSE
 
 # positions to align, refering to reference genome
@@ -97,7 +97,7 @@ LOCUS="PfalcMitoGenome"
 # Name appended to beginning of output file names
 PREFIX=paganAlign_
 
-# Pattern match that returns all mitochondrial genomes from GenBank (use wildcards as necessary)
+# Pattern match for all mitochondrial genomes to be included in alignment (use wildcards as necessary).  If you only have the references, then use this `mtGenPATTERN=$REF`
 mtGenPATTERN="A*Genome.fasta"
 
 # Name of fasta file containing partial mitochondrial sequences from GenBank
