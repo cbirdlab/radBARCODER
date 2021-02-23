@@ -97,7 +97,7 @@ LOCUS="PfalcMitoGenome"
 # Name appended to beginning of output file names
 PREFIX=paganAlign_
 
-# Pattern match for all mitochondrial genomes to be included in alignment (use wildcards as necessary).  If you only have the references, then use this `mtGenPATTERN=$REF`
+# Pattern match for all mitochondrial genomes to be included in alignment (use wildcards as necessary).  If you only have the reference genome, then use this `mtGenPATTERN=$REF` instead of the example pattern that follows
 mtGenPATTERN="A*Genome.fasta"
 
 # Name of fasta file containing partial mitochondrial sequences from GenBank
