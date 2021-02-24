@@ -99,8 +99,8 @@ LOCUS="PfalcMitoGenome"
 # Name appended to beginning of output file names
 PREFIX=paganAlign_
 
-# Pattern match for all mitochondrial genomes to be included in alignment (use wildcards as necessary).  If you only have the reference genome, then use this `mtGenPATTERN=$REF` instead of the example pattern that follows
-mtGenPATTERN="A*Genome.fasta"
+# Pattern match for all mitochondrial genomes to be included in alignment (use wildcards as necessary).  If you only have the reference genome, then use this `mtGenPATTERN=""` instead of the example that follows
+mtGenPATTERN="*.mtGenome.fasta"
 
 # Name of fasta file containing partial mitochondrial sequences from GenBank
 GENBANKFASTA=""
@@ -110,7 +110,7 @@ radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenP
 
 #### 6. `radBARCODER mkMETAGENO`: Make meta mitochondrial genomes
 
-Use `radBARCODER mkMETAGENO` to create a consensus meta mitochondrial genomes for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
+Use `radBARCODER mkMETAGENO` to create a consensus meta mitochondrial genome for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
 
 ```bash
 PREFIX=paganAlign_
@@ -403,7 +403,7 @@ This will create mildly filtered `*RG.bam` files for each individual. These alig
 
 From here forward, you'll be running the `radBARCODER` scripts.  If you have not already, install required missing dependencies and clone the `radBARCODER` repo into your ProjectDir, and move the `radBARCODER*` and `*R` scripts to the mkBAM dir (see instructions above).
 
-As a reminder, incontrast to the quick start section, here I describe running the `radBARCODER` scripts in your project directory. If you want to run them from the `$PATH`, you will have to modify the paths in the code blocks in the detailed instruction sections below. This is the expected dir structure after completing the previous step (some files and dirs created by trimming and mapping are omitted):
+As a reminder, in contrast to the quick start section, here I describe running the `radBARCODER` scripts in your project directory. If you want to run them from the `$PATH`, you will have to modify the paths in the code blocks in the detailed instruction sections below. This is the expected dir structure after completing the previous step (some files and dirs created by trimming and mapping are omitted):
 
 ```
 $ tree ../ProjectDir
@@ -545,7 +545,9 @@ ProjectDir
 
 *Dependencies*: [`pagan`](http://wasabiapp.org/software/pagan/) [`mafft`](https://mafft.cbrc.jp/alignment/software/) [`seaview`](http://doua.prabi.fr/software/seaview) 
 
-If you have additional sequences from GenBank that you would like to include with this alignment, you should download them and save into your 'mkBAM' dir. Additional mtGenome sequences should be saves as FASTA files and renamed to have a common format of your choosing. A FASTA file for targeted locus sequences can also be downloaded and included in the alignment.  See the specification of user-defined variables `mtGenPATTERN` and `GENBANKFASTA` below. 
+[optional] If you have additional sequences from GenBank that you would like to include with this alignment, you should download them and save into your 'mkBAM' dir. Additional mtGenome sequences should be saves as FASTA files and renamed to have a common format of your choosing. Note that your reference genome should have the same common naming format. See the specification of user-defined variable `mtGenPATTERN` below or in step 3 of the Quickstart guide above. 
+
+[optional] A FASTA file for targeted locus sequences can also be downloaded and included in the alignment.  See the specification of user-defined variable `GENBANKFASTA` below below or in step 3 of the Quickstart guide above. 
 
 Note that seaview is only used to convert from `fasta` to `nexus` format, so if you don't have it installed, you can manually convert the `fasta` to `nexus`. Also, while the `pagan2` precompiled `tar.gz` does have `mafft`, it is not complete and you should install the complete `mafft` if you are aligning very long sequences, otherwise you will get an error when setting `LONGALIGNMENT=TRUE`
 
@@ -586,7 +588,8 @@ LOCUS="PfalcMitoGenome"
 PREFIX=paganAlign_
 
 # a pattern using wildcards that matches all mtGenome files other than the reference mtGenome
-mtGenPATTERN="A*Genome.fasta"
+# if you don't have additonal genomes, then `mtGenPATTERN=""`
+mtGenPATTERN="*.mtGenome.fasta"
 
 # the name of a fasta file that has sequences to include in the alignment
 GENBANKFASTA=""
@@ -613,7 +616,7 @@ the number of cpu cores for the task THREADS=.......4
 the characters added to every file created PREFIX=........paganAlign_
 the name of the locus or loci LOCUS=.........PfalcMitoGenome
 the nucleotide positions in the reference genome to consider POSITIONS=.....1-18000
-the ls pattern shared by all mtGenomes that will be aligned mtGenPATTERN=..A*Genome.fasta
+the ls pattern shared by all mtGenomes that will be aligned mtGenPATTERN=..*.mtGenome.fasta
 the aligner that will be used LONGALIGNMENT=.FALSE
 the GenBank sequences that should also be aligned GENBANK=.......
 
