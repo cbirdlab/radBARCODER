@@ -125,7 +125,7 @@ nontargetNAME=Ppr
 targetIDs=$(cat Pfalcifer.txt)
 targetNAME=Pfa
 
-# a list of codes used to label population identity in the names of the `bam` files.  A meta genome will be made for each population from the individuals in the list of "targetIDs"
+# a list of codes used to label population identity in the names of the `bam` files. The "\t" are tab separators between the pops.  A meta genome will be made for each population from the individuals in the list of "targetIDs"
 POPS=$(echo -e AtMk"\t"At"\t"Pk"\t"Kr"\t"St)
 
 # for each position in the genome alignment, the minimum number of individuals having data that are required to include the consensus nucleotide call
