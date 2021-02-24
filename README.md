@@ -61,9 +61,9 @@ All of the following files should be in a single directory:
 
 
   
-#### 4. `radBARCODER bam2GENO`: Convert `bam` files to mitochondrial genome sequences
+#### 4. `radBARCODER bam2GENO`: Convert `bam` files to consensus mitochondrial genome sequences
 
-Use `radBARCODER bam2GENO` to convert each of the `bam` files to a mitochondrial genome sequence.  All intermediate and final files are saved to `./out_bam2GENO`
+Use `radBARCODER bam2GENO` to convert each of the `bam` files to a consensus mitochondrial genome sequence for an individual.  All intermediate and final files are saved to `./out_bam2GENO`
 
 ```bash
 # Name of reference mtGenome that you mapped your NGS reads to
