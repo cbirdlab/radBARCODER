@@ -41,16 +41,6 @@ These are the packages used by `radBARCODER`. If you install the newest versions
 
 All of the following files should be in a single directory:
 
-* *Mitochondrial genomes*
-
-  * The mitochondrial genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file.
-
-  * One mitochondrial genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This is the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data. The reference can be one of the mitochondrial genomes defined above or not.
-  
-* *locus-specific fasta files*
-
-  * If you also want to include incomplete mitochondrial sequences in the alignment, you need a single fasta file with as many sequences as you wish.  These sequences do not need to be aligned.
-
 * *`*bam` files*
 
   * Your NGS data should be in the form of binary alignment maps ([BAM](https://en.wikipedia.org/wiki/Binary_Alignment_Map)) that have been created using your NGS data and the reference mitochondrial genome. The `bam` file should also be indexed (see [tabix](https://github.com/samtools/tabix)).  1 `bam` and 1 `bam.bai` per individual. The following naming format is assumed: `Population*UniqueID*bam`.  If you want guidance on making the `bam` files, then scroll down to the detailed instructions that begin after the quick start instructions.
@@ -58,6 +48,18 @@ All of the following files should be in a single directory:
 * *Sample classification files*
 
   * `radBARCODER` allows you to classify your samples into two groupings, independent of population classification, that will be used to construct consensus metagenomes.  The purpose of these files is to identify sequences as the expected target taxon or the unexpected taxon that showed up in your NGS data.  The files should be text and contain one ID per line, with the ID matching the pattern used in the `bam` files.  For example: `PopID_IndividualID`. Even if you do not have two groups of samples, you still need one file with the names of all the samples and a second file that is empty.  Naming format of the file, itself, is not important.
+
+* *Mitochondrial genomes*
+
+  * One mitochondrial genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This should be the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data. The reference can be one of the mitochondrial genomes below.
+
+  * [optional] The mitochondrial genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file. *If you do include these additional genomes, be sure that your reference shares the common naming pattern.*
+  
+* *locus-specific fasta files*
+
+  * [optional] If you also want to include incomplete mitochondrial sequences in the alignment, you need a single fasta file with as many sequences as you wish.  These sequences do not need to be aligned.
+
+
   
 #### 4. `radBARCODER bam2GENO`: Convert `bam` files to mitochondrial genome sequences
 
