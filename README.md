@@ -51,7 +51,7 @@ All of the following files should be in a single directory:
 
 * *Mitochondrial genomes*
 
-  * One mitochondrial genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This should be the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data. The reference can be one of the mitochondrial genomes below.
+  * One mitochondrial genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This should be the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data. The reference can be one of the mitochondrial genomes below. If you do not have a viable reference genome, see [NOVOPlasty](https://github.com/ndierckx/NOVOPlasty) to make a mitochondrial reference _de novo_ from your RAD data
 
   * [optional] The mitochondrial genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file. *If you do include these additional genomes, be sure that your reference shares the common naming pattern.*
   
