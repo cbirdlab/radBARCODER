@@ -108,7 +108,7 @@ GENBANKFASTA=""
 radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
-#### 6. `radBARCODER mkMETAGENO`: Make meta mitochondrial genomes
+#### 6. OPTIONAL `radBARCODER mkMETAGENO`: Make meta mitochondrial genomes
 
 Use `radBARCODER mkMETAGENO` to create a consensus meta mitochondrial genome for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
 
@@ -148,6 +148,7 @@ PCT=99
 radBARCODER fltrGENOSITES $FASTA $PCT
 ```
 
+Be sure to check the resulting alignment by eye because while pagan2 is really good, it does make mistakes sometimes when correcting errors made in the conversion of the bam files to the fasta files. Misaligned haplotypes should either be removed or the `$FASTA` file should be edited by eye to fix the misalignments and then run `fltrGENOSITES` again.
 
 #### 8. Evolutionary reconstruction and haplotype networks
 
