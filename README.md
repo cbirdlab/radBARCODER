@@ -142,7 +142,7 @@ Use `radBARCODER fltrGENOSITES` to filter genomes with more missing/ambiguous/in
 # name of file with mitochondrial genome or meta genome alignments
 FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 
-# keep nucleotides that occur in this percent of genomes and metagenomes in the alignment
+# keep genomes with this percent of positions containing "missing data": `N`, `n`, or `-`
 PCT=99
 
 radBARCODER fltrGENOSITES $FASTA $PCT
