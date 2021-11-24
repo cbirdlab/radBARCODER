@@ -920,7 +920,8 @@ if you install `raxml`, make sure you have the following dependencies:
 ```bash
 sudo apt-get install flex bison libgmp3-dev
 ```
-
+ ---
+ 
 ## Citation
 
 Bird, C.E. (2021) radBARCODER. https://github.com/cbirdlab/radBARCODER
