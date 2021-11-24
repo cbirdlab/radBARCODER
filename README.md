@@ -923,4 +923,4 @@ sudo apt-get install flex bison libgmp3-dev
 
 ## Citation
 
-Bird, C.E. (2021) radBARCOER. https://github.com/cbirdlab/radBARCODER
+Bird, C.E. (2021) radBARCODER. https://github.com/cbirdlab/radBARCODER
