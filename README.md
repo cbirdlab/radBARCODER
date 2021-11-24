@@ -6,7 +6,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 * `radBARCODER aliGENO`
 
-* `radBARCODER mkCONCGENO`
+* `radBARCODER mkMETAGENO`
 
 * `radBARCODER fltrGENOSITES`
 
@@ -108,9 +108,9 @@ GENBANKFASTA=""
 radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
-#### 6. OPTIONAL `radBARCODER mkMETAGENO`: Make meta mitochondrial genomes
+#### 6. OPTIONAL `radBARCODER mkMETAGENO`: Make concensus mitochondrial genomes
 
-Use `radBARCODER mkMETAGENO` to create a consensus meta mitochondrial genome for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
+Use `radBARCODER mkMETAGENO` to create a consensus or meta mitochondrial genome for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
 
 ```bash
 PREFIX=paganAlign_
