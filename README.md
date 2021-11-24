@@ -6,7 +6,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 * `radBARCODER aliGENO`
 
-* `radBARCODER mkMETAGENO`
+* `radBARCODER mkCONCGENO`
 
 * `radBARCODER fltrGENOSITES`
 
