@@ -1,4 +1,4 @@
-# radBARCODER - A wrapper script to assemble, align, and filter plastid genomes from binary alignment maps
+# radBARCODER: A wrapper script to assemble, align, and filter plastid genomes from nucleotide data in binary alignment maps
 
 * `radBARCODER bam2GENO`: extract plastid genome seqeunce from binary alignment maps
 
@@ -924,4 +924,4 @@ sudo apt-get install flex bison libgmp3-dev
 
 If you use radBARCODER, please include the following citations:
 
-Bird, C.E. (2021) radBARCODER: A wrapper script to assemble, align, and filter plastid genomes from binary alignment maps. https://github.com/cbirdlab/radBARCODER
+Bird, C.E. (2021). radBARCODER: A wrapper script to assemble, align, and filter plastid genomes from nucleotide data in binary alignment maps. https://github.com/cbirdlab/radBARCODER
