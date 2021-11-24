@@ -1,6 +1,4 @@
-# radBARCODER
-
-scripts to extract, align, and type mtDNA data from restriction site associated DNA sequenced on an [Illumina Machine](https://en.wikipedia.org/wiki/Illumina,_Inc.) with plastid reference genomes of non-model species on linux/unix computers
+# radBARCODER - A wrapper script to assemble, align, and filter plastid genomes from binary alignment maps
 
 * `radBARCODER bam2GENO`: extract plastid genome seqeunce from binary alignment maps
 
@@ -924,4 +922,6 @@ sudo apt-get install flex bison libgmp3-dev
  
 ## Citation
 
-Bird, C.E. (2021) radBARCODER. https://github.com/cbirdlab/radBARCODER
+If you use radBARCODER, please include the following citations:
+
+Bird, C.E. (2021) radBARCODER: A wrapper script to assemble, align, and filter plastid genomes from binary alignment maps. https://github.com/cbirdlab/radBARCODER
