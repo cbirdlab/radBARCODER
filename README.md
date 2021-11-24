@@ -1,6 +1,6 @@
 # radBARCODER
 
-scripts to extract, align, and type mtDNA data from restriction site associated DNA sequenced on an [Illumina Machine](https://en.wikipedia.org/wiki/Illumina,_Inc.) with mitochondrial reference genomes of non-model species on linux/unix computers
+scripts to extract, align, and type mtDNA data from restriction site associated DNA sequenced on an [Illumina Machine](https://en.wikipedia.org/wiki/Illumina,_Inc.) with plastid reference genomes of non-model species on linux/unix computers
 
 * `radBARCODER bam2GENO`: extract plastid genome seqeunce from binary alignment maps
 
@@ -8,7 +8,7 @@ scripts to extract, align, and type mtDNA data from restriction site associated 
 
 * `radBARCODER mkMETAGENO`: make a concensus or metagenome from several individual genomes
 
-* `radBARCODER fltrGENOSITES`: remove missing data from sites and genomes
+* `radBARCODER fltrGENOSITES`: remove genomes with too much missing data and remaining sites with any missing data
 
 ---
 
@@ -49,24 +49,24 @@ All of the following files should be in a single directory:
 
   * `radBARCODER` allows you to classify your samples into two groupings, independent of population classification, that will be used to construct consensus metagenomes.  The purpose of these files is to identify sequences as the expected target taxon or the unexpected taxon that showed up in your NGS data.  The files should be text and contain one ID per line, with the ID matching the pattern used in the `bam` files.  For example: `PopID_IndividualID`. Even if you do not have two groups of samples, you still need one file with the names of all the samples and a second file that is empty.  Naming format of the file, itself, is not important.
 
-* *Mitochondrial genomes*
+* *Plastid genomes*
 
-  * One mitochondrial genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This should be the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data. The reference can be one of the mitochondrial genomes below. If you do not have a viable reference genome, see [NOVOPlasty](https://github.com/ndierckx/NOVOPlasty) to make a mitochondrial reference _de novo_ from your RAD data
+  * One plastid genome should be selected to be the reference [FASTA](https://en.wikipedia.org/wiki/FASTA_format) with 1 sequence, not 1 sequence per gene region. This should be the file used to make the [binary alignment maps](https://en.wikipedia.org/wiki/Binary_Alignment_Map) from your NGS data. The reference can be one of the plastid genomes below. If you do not have a viable reference genome, see [NOVOPlasty](https://github.com/ndierckx/NOVOPlasty) to assemble a plastid reference genome _de novo_ from your RAD data
 
-  * [optional] The mitochondrial genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file. *If you do include these additional genomes, be sure that your reference shares the common naming pattern.*
+  * [optional] The plastid genomes that you want to compare your data to should be in [FASTA](https://en.wikipedia.org/wiki/FASTA_format) format with 1 sequence, not 1 sequence per gene region. There should be a common pattern in name of these files, such as `*_mtGenomes.fasta` to allow `radBARCODER` to work correctly.  1 genome per file. *If you do include these additional genomes, be sure that your reference shares the common naming pattern.*
   
 * *locus-specific fasta files*
 
-  * [optional] If you also want to include incomplete mitochondrial sequences in the alignment, you need a single fasta file with as many sequences as you wish.  These sequences do not need to be aligned.
+  * [optional] If you also want to include incomplete plastid sequences in the alignment, you need a single fasta file with as many sequences as you wish.  These sequences do not need to be aligned.
 
 
   
-#### 4. `radBARCODER bam2GENO`: Convert `bam` files to consensus mitochondrial genome sequences
+#### 4. `radBARCODER bam2GENO`: Convert `bam` files to consensus genome sequences
 
-Use `radBARCODER bam2GENO` to convert each of the `bam` files to a consensus mitochondrial genome sequence for an individual.  All intermediate and final files are saved to `./out_bam2GENO`
+Use `radBARCODER bam2GENO` to convert each of the `bam` files to a consensus plastid genome sequence for an individual.  All intermediate and final files are saved to `./out_bam2GENO`
 
 ```bash
-# Name of reference mtGenome that you mapped your NGS reads to
+# Name of reference genome that you mapped your NGS reads to
 REF=reference.Pfalc.mtGenome.fasta  
 
 # String pattern match to the bam files for every individual (do not include a leading wildcard). Use same pattern match conventions as you would with `ls`
@@ -78,7 +78,7 @@ THREADS=32
 radBARCODER bam2GENO $REF $bamPATTERN $THREADS
 ```
   
-#### 5. `radBARCODER aliGENO`: Align the mitochondrial genomes
+#### 5. `radBARCODER aliGENO`: Align the genomes
 
 Use `radBARCODER aliGENO` to align the mitchondrial genome sequences with either `pagan2` (`LONGALIGNMENT=FALSE`) or `mafft` (`LONGALIGNMENT=TRUE`). It pretty easy to modify the alignment method in the `align` function (found in `radBarcoder_functions.bash`). All intermediate and final files are saved to `./out_aliGENO`
 
@@ -102,15 +102,15 @@ PREFIX=paganAlign_
 # Pattern match for all mitochondrial genomes to be included in alignment (use wildcards as necessary).  If you only have the reference genome, then use this `mtGenPATTERN=""` instead of the example that follows
 mtGenPATTERN="*.mtGenome.fasta"
 
-# Name of fasta file containing partial mitochondrial sequences from GenBank
+# Name of fasta file containing partial genome sequences from GenBank
 GENBANKFASTA=""
 
 radBARCODER aliGENO $REF $bamPATTERN $THREADS $PREFIX $LOCUS $POSITIONS "$mtGenPATTERN" $LONGALIGNMENT $GENBANKFASTA
 ```
 
-#### 6. OPTIONAL `radBARCODER mkMETAGENO`: Make concensus mitochondrial genomes
+#### 6. OPTIONAL `radBARCODER mkMETAGENO`: Make concensus or meta genomes
 
-Use `radBARCODER mkMETAGENO` to create a consensus or meta mitochondrial genome for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the mitochondrial genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
+Use `radBARCODER mkMETAGENO` to create a consensus or meta genome for each population as well as two predefined groups of individuals in your NGS data. These are useful when you recover small portions of the plastid genome in each individual. All intermediate and final files are saved to `./out_mkMETAGENO`
 
 ```bash
 PREFIX=paganAlign_
@@ -139,7 +139,7 @@ radBARCODER mkMETAGENO "$nontargetIDs" "$targetIDs" "$POPS" $PREFIX $LOCUS $THRE
 Use `radBARCODER fltrGENOSITES` to filter genomes with more missing/ambiguous/indel base calls than specified with `PCT` then remove sites with missing/ambiguous/indel base calls.  Higher values of `PCT` retain more individuals and lower values retain more nuclotides. The result is a `fasta` alignment with only genomes and sites with A, C, T, or G nucleotide calls.  Output files include the `fasta` alignment, a `pdf` with descriptive plots, and a `csv` describing the reference genome positions retained.  Output files are saved to same directory as the input file (`FASTA`).
 
 ```bash
-# name of file with mitochondrial genome or meta genome alignments
+# name of file with plastid genome or meta genome alignments
 FASTA=paganAlign_ALL_masked_aligned_clean_PfalcMitoGenome.fasta
 
 # keep genomes with this percent of positions containing "missing data": `N`, `n`, or `-`
@@ -170,7 +170,7 @@ All bash code assumes that your OS is [Ubuntu](https://ubuntu.com/).
 
 #### 1. Detailed Installation and Dependencies
 
-We will use `dDocentHPC` to trim and map your files to the reference genome prior to using `radBARCODER` to generate mitochondrial genome alignments and metagenomes. Here, I assume that you will clone fresh copies of the `radBARCODER` and `dDocentHPC` repos into your project directory (so we avoid the vagaries of file permissions and the `$PATH`) and run the scripts directly rather than putting them into your `$PATH`.  
+We will use `dDocentHPC` to trim and map your files to the reference genome prior to using `radBARCODER` to generate plastid genome alignments and metagenomes. Here, I assume that you will clone fresh copies of the `radBARCODER` and `dDocentHPC` repos into your project directory (so we avoid the vagaries of file permissions and the `$PATH`) and run the scripts directly rather than putting them into your `$PATH`.  
 
 Clone the radBARCODER and dDocentHPC repos to your project dir:
 
@@ -286,7 +286,7 @@ ProjectDir/Population_UniqueIndividualID.F.fq.gz
 ProjectDir/Population_UniqueIndividualID.R.fq.gz
 ```
 
-It is also assumed that you have a fully assembled mitochondrial genome saved as a [FASTA](https://en.wikipedia.org/wiki/FASTA) file.  The file should contain 1 sequence. You should name the reference mtGenome used for mapping sequence reads as follows:
+It is also assumed that you have a fully assembled plastid genome saved as a [FASTA](https://en.wikipedia.org/wiki/FASTA) file.  The file should contain 1 sequence. You should name the reference mtGenome used for mapping sequence reads as follows:
 
 ```
 # no more and no less than 3 periods should be used in the name and the * should be replaced with descriptive characters. I recommend species name and and genbank accession number.
@@ -703,11 +703,11 @@ ProjectDir
 It is important to check the alignment by eye and edit as necessary or adjust upstream settings. I recommend [`seaview`](http://doua.prabi.fr/software/seaview) for this, but any alignment viewer will work. In the example data set, which has a lot of missing data, I did not have adjust the alignment at all, but mileage may vary.
 
 
-#### 7. `radBARCODER mkMETAGEN` Make Meta-Genomes
+#### 7. `radBARCODER mkMETAGENO` Make Concensus or Meta-Genomes
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
-If you didn't have much luck extracting the same portions of the mtGenome among individuals in steps 1-6, you can make meta mitochondrial genomes from groups of individuals and align those using `mkMETAGEN` 
+If you didn't have much luck extracting the same portions of the mtGenome among individuals in steps 1-6, you can make consensus or meta  genomes from groups of individuals and align those using `mkMETAGENO` 
 
 This function will make consensus sequences for each sample category following the dDocent naming convention (`PopulationID_IndividualID`), but you need to specify the the population ids as described below.  The genesis of radBARCODER was trying to figure out what an unexpected population partition was, so it is also assumed that a subset of individuals will be identified at "nonTarget". A text file with one id (`PopulationID_IndividualID`) per line can be used for this as shown below.  The remaining individuals belonging to the majority or targeted taxon should be listed similarly in a separate file. A metagenome will be created for the individuals in each of these files. The two files with the sample names must not contain any of the same individuals.  If there are no "nontarget" individuals, then replace the line below with `nontargetIDs=""`.  
 
@@ -812,11 +812,11 @@ ProjectDir
 ```
 
 
-#### 8. `radBARCODER fltrGENOSITES`  Selectively filter your final genome and meta genome alignments
+#### 8. `radBARCODER fltrGENOSITES`  Selectively filter your final genome, consensus, or meta genome alignments
 
 *Dependencies*: `R` (`seqinr`, `stringr`) 
 
-This function will call `fltrGENOSITES.R` which is included in the `radBARCODER` repo.  Make sure it is in your `mkBAM` directory
+This function will call `fltrGENOSITES.R` which is included in the `radBARCODER` repo.  Make sure it is in your `mkBAM` directory or your `$PATH`
 
 Filter genomes with more missing/ambiguous/indel base calls than specified with `PCT` then remove sites with missing/ambiguous/indel base calls.  Higher values of `PCT` retain more individuals and lower values retain more nuclotides. The result is a `fasta` alignment with only genomes and sites with A, C, T, or G nucleotide calls.  Output files include the `fasta` alignment, a `pdf` with descriptive plots, and a `csv` describing the reference genome positions retained.  Output files are saved to same directory as the input file (`FASTA`).
 
